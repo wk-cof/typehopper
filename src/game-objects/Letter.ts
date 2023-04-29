@@ -1,3 +1,4 @@
+// Letter.ts
 import Phaser from 'phaser';
 
 export default class Letter {
@@ -10,7 +11,17 @@ export default class Letter {
     this.scene = scene;
     this.letter = letter;
     this.letterSpeed = letterSpeed;
-    this.text = this.scene.add.text(x, y, this.letter, { fontSize: '32px', color: '#000' });
+
+    // Generate a random color for the letter
+    const randomColor = Phaser.Display.Color.RandomRGB().rgba;
+
+    this.text = this.scene.add.text(x, y, this.letter, {
+      fontSize: '48px',
+      color: randomColor,
+      fontStyle: 'bold',
+      stroke: '#000',
+      strokeThickness: 1,
+    });
   }
 
   update(time: number, delta: number): void {
