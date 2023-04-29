@@ -48,27 +48,38 @@ export default class GameScene extends Phaser.Scene {
     // Create text assets for letters and add them to the letters array
     const letterTexts = ['A', 'B', 'C', 'D'];
     letterTexts.forEach((letter, index) => {
-      const letterInstance = new Letter(this, letter, 500 + index * 100, 300, this.letterSpeed);
+      const letterInstance = new Letter(this, letter, 500 + index * 400, 300, this.letterSpeed);
       this.letters.push(letterInstance);
     });
   }
 
   update(time: number, delta: number): void {
     // Move letters to the left
-    if (this.letterPressed) {
+    if (this.letterPressed && this.letterPressed.toLowerCase() === this.letters[0].letter.toLowerCase()) {
+      const removedLetter = this.letters.splice(0, 1);
+      removedLetter[0].destroy();
       this.bunny.hop();
-
-      this.letterPressed = undefined
+      this.letterPressed = undefined;
     }
     this.bunny.update(time, delta);
-    this.background.update(delta);
-    this.letters.forEach((letter) => {
-      letter.update(time, delta);
-    });
+
+    const reachedLetter = this.inJumpDistance(this.letters[0].getGameObject());
+    if (!reachedLetter) {
+      this.background.update(delta);
+      this.letters.forEach((letter) => {
+        letter.update(time, delta);
+      });
+    }
   }
 
-  inJumpDistance(letter: any) {
-    // todo
-    return true;
+  inJumpDistance(letter: Phaser.GameObjects.Text): boolean {
+    const distance = Phaser.Math.Distance.Between(
+      this.bunny.bunny.x,
+      this.bunny.bunny.y,
+      letter.x,
+      letter.y
+    );
+
+    return distance < 50;
   }
 }

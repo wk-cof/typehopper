@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 
 export default class Letter {
   private scene: Phaser.Scene;
-  private letter: string;
+  public letter: string;
   private text: Phaser.GameObjects.Text;
   private letterSpeed: number;
 
@@ -24,11 +24,19 @@ export default class Letter {
     });
   }
 
+  get letterObject(): Phaser.GameObjects.Text {
+    return this.text;
+  }
+
   update(time: number, delta: number): void {
     this.text.x -= this.letterSpeed * delta / 1000;
   }
 
   getGameObject(): Phaser.GameObjects.Text {
     return this.text;
+  }
+
+  destroy(): void {
+    this.text.destroy();
   }
 }

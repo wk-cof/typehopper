@@ -12,6 +12,10 @@ export default class Bunny {
     this.scene = scene;
   }
 
+  get bunny(): Phaser.Types.Physics.Arcade.ImageWithDynamicBody {
+    return this.physicsBunny;
+  }
+
   preload() {
     this.scene.load.image(BUNNY_KEY, 'assets/bunny.gif');
   }
