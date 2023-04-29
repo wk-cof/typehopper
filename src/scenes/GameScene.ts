@@ -4,8 +4,6 @@ import Bunny from '../game-objects/Bunny';
 import Letter from '../game-objects/Letter';
 import Background from '../game-objects/Background';
 
-const BUNNY_KEY = 'bunny';
-
 type KeyMaps = {
   [key: string]: {
     emitOnRepeat:boolean;
@@ -13,17 +11,15 @@ type KeyMaps = {
     isDown: boolean
     isUp: boolean;
     keyCode: number;
-
   };
 };
 
 export default class GameScene extends Phaser.Scene {
   private bunny!: Bunny;
   private background!: Background;
-  private keyMaps: KeyMaps = {};
   private letters!: Array<Letter>;
   private letterPressed: string | undefined;
-  private letterSpeed = 200;
+  private letterSpeed = 150;
   constructor() {
     super('game-scene');
   }
@@ -45,19 +41,17 @@ export default class GameScene extends Phaser.Scene {
       this.letterPressed = event.key;
     });
 
-    // Create text assets for letters and add them to the letters array
-    const letterTexts = ['A', 'B', 'C', 'D'];
-    letterTexts.forEach((letter, index) => {
-      const letterInstance = new Letter(this, letter, 500 + index * 400, 300, this.letterSpeed);
-      this.letters.push(letterInstance);
-    });
+    // Create initial letters
+    for (let i = 0; i < 4; i++) {
+      this.createNewLetter(500 + i * 400);
+    }
   }
 
   update(time: number, delta: number): void {
-    // Move letters to the left
     if (this.letterPressed && this.letterPressed.toLowerCase() === this.letters[0].letter.toLowerCase()) {
-      const removedLetter = this.letters.splice(0, 1);
-      removedLetter[0].destroy();
+      const removedLetter = this.letters.shift();
+      removedLetter?.destroy();
+      this.createNewLetter(this.letters[this.letters.length - 1].getGameObject().x + 400);
       this.bunny.hop();
       this.letterPressed = undefined;
     }
@@ -81,5 +75,13 @@ export default class GameScene extends Phaser.Scene {
     );
 
     return distance < 50;
+  }
+
+  createNewLetter(x?: number): void {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const randomLetter = letters.charAt(Math.floor(Math.random() * letters.length));
+    const xPos = x || 1500;
+    const newLetter = new Letter(this, randomLetter, xPos, 300, this.letterSpeed);
+    this.letters.push(newLetter);
   }
 }
