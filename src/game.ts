@@ -2,10 +2,15 @@
 import Phaser from 'phaser';
 import GameScene from './scenes/GameScene';
 
+export const LEVEL_DIMENSIONS = {
+  x: 780,
+  y: 384,
+};
+
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: LEVEL_DIMENSIONS.x,
+  height: LEVEL_DIMENSIONS.y,
   physics: {
     default: 'arcade',
     arcade: {

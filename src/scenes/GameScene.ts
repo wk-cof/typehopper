@@ -23,14 +23,14 @@ export default class GameScene extends Phaser.Scene {
   private keyMaps: KeyMaps = {};
   private letters!: Array<Letter>;
   private letterPressed: string | undefined;
-  private letterSpeed = 100;
+  private letterSpeed = 200;
   constructor() {
     super('game-scene');
   }
 
   preload() {
     this.bunny = new Bunny(this);
-    this.background = new Background(this);
+    this.background = new Background(this, this.letterSpeed);
 
     this.bunny.preload();
     this.background.preload();
@@ -39,6 +39,7 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.background.create();
     this.bunny.create();
+
     this.letters = [];
     this.input.keyboard?.on('keyup', (event: any) => {
       this.letterPressed = event.key;
@@ -60,6 +61,7 @@ export default class GameScene extends Phaser.Scene {
       this.letterPressed = undefined
     }
     this.bunny.update(time, delta);
+    this.background.update(delta);
     this.letters.forEach((letter) => {
       letter.update(time, delta);
     });
