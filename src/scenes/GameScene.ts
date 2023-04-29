@@ -78,7 +78,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createNewLetter(x?: number): void {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const letters = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
     const randomLetter = letters.charAt(Math.floor(Math.random() * letters.length));
     const xPos = x || 1500;
     const newLetter = new Letter(this, randomLetter, xPos, 300, this.letterSpeed);
