@@ -1,8 +1,10 @@
+// GameScene.ts
 import Phaser from 'phaser';
 import Bunny from '../game-objects/Bunny';
 import Letter from '../game-objects/Letter';
+import Background from '../game-objects/Background';
+
 const BUNNY_KEY = 'bunny';
-const BACKGROUND_KEY = 'backgroudn';
 
 type KeyMaps = {
   [key: string]: {
@@ -17,7 +19,7 @@ type KeyMaps = {
 
 export default class GameScene extends Phaser.Scene {
   private bunny!: Bunny;
-  private background!: Phaser.GameObjects.Image;
+  private background!: Background;
   private keyMaps: KeyMaps = {};
   private letters!: Array<Letter>;
   private letterPressed: string | undefined;
@@ -27,14 +29,15 @@ export default class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image(BUNNY_KEY, 'assets/bunny.gif');
-    this.load.image(BACKGROUND_KEY, 'assets/background.jpg');
+    this.bunny = new Bunny(this);
+    this.background = new Background(this);
 
+    this.bunny.preload();
+    this.background.preload();
   }
 
   create() {
-    this.background = this.add.image(400, 300, BACKGROUND_KEY);
-    this.bunny = new Bunny(this);
+    this.background.create();
     this.bunny.create();
     this.letters = [];
     this.input.keyboard?.on('keyup', (event: any) => {

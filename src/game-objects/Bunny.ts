@@ -10,6 +10,10 @@ export default class Bunny {
     this.scene = scene;
   }
 
+  preload() {
+    this.scene.load.image(BUNNY_KEY, 'assets/bunny.gif');
+  }
+
   create() {
     this.physicsBunny = this.scene.physics.add.image(this.defaultPosition.x, this.defaultPosition.y, BUNNY_KEY).setScale(0.1);
     const customBounds = new Phaser.Geom.Rectangle(0, -150, 800, 600);
