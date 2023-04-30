@@ -34,6 +34,9 @@ export default class GameScene extends Phaser.Scene {
 
     this.letters = new Letters(this, this.letterSpeed);
     this.letters.createInitialLetters();
+    this.input.keyboard?.on('keyup', (event: any) => {
+      this.letterPressed = event.key;
+    });
   }
 
   update(time: number, delta: number): void {

@@ -6,13 +6,12 @@ export default class GameMenuScene extends Phaser.Scene {
   }
 
   preload() {
-    // Load background image here
-    // this.load.image('menu-background', 'path/to/menu-background.png');
+    this.load.image('menu-background', '../assets/menu-background.png');
   }
 
   create() {
     // Add background image here
-    // this.add.image(0, 0, 'menu-background').setOrigin(0, 0);
+    this.add.image(0, 0, 'menu-background').setOrigin(0, 0);
 
     // Create a start game button
     const startButton = this.add.text(
@@ -21,7 +20,7 @@ export default class GameMenuScene extends Phaser.Scene {
       'Start Game',
       {
         fontSize: '32px',
-        color: '#ffffff',
+        color: '#000',
       }
     );
     startButton.setOrigin(0.5, 0.5);

@@ -16,17 +16,26 @@ export default class Background {
   }
 
   preload() {
-    this.scene.load.image(BACKGROUND_KEY, 'assets/background.jpg');
+    // this.scene.load.image(BACKGROUND_KEY, 'assets/background.jpg');
+    this.scene.load.image(BACKGROUND_KEY, 'assets/level-2.png');
   }
 
   create() {
-    this.background1 = this.scene.add.image(LEVEL_DIMENSIONS.x / 2, LEVEL_DIMENSIONS.y / 2, BACKGROUND_KEY);
-    this.background2 = this.scene.add.image(LEVEL_DIMENSIONS.x / 2 + LEVEL_DIMENSIONS.x, LEVEL_DIMENSIONS.y / 2, BACKGROUND_KEY);
+    this.background1 = this.scene.add.image(
+      LEVEL_DIMENSIONS.x / 2,
+      LEVEL_DIMENSIONS.y / 2,
+      BACKGROUND_KEY
+    );
+    this.background2 = this.scene.add.image(
+      LEVEL_DIMENSIONS.x / 2 + LEVEL_DIMENSIONS.x,
+      LEVEL_DIMENSIONS.y / 2,
+      BACKGROUND_KEY
+    );
   }
 
   update(delta: number) {
-    this.background1.x -= this.scrollSpeed * delta / 1000;
-    this.background2.x -= this.scrollSpeed * delta / 1000;
+    this.background1.x -= (this.scrollSpeed * delta) / 1000;
+    this.background2.x -= (this.scrollSpeed * delta) / 1000;
 
     if (this.background1.x < -LEVEL_DIMENSIONS.x / 2) {
       this.background1.x = LEVEL_DIMENSIONS.x / 2 + LEVEL_DIMENSIONS.x;
@@ -35,6 +44,5 @@ export default class Background {
     if (this.background2.x < -LEVEL_DIMENSIONS.x / 2) {
       this.background2.x = LEVEL_DIMENSIONS.x / 2 + LEVEL_DIMENSIONS.x;
     }
-
   }
 }
