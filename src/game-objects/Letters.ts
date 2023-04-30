@@ -20,14 +20,22 @@ export default class Letters {
 
   createNewLetter(x: number): void {
     const letters = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
-    const randomLetter = letters.charAt(Math.floor(Math.random() * letters.length));
+    const randomLetter = letters.charAt(
+      Math.floor(Math.random() * letters.length)
+    );
     const xPos = x;
-    const newLetter = new Letter(this.scene, randomLetter, xPos, 300, this.letterSpeed);
+    const newLetter = new Letter(
+      this.scene,
+      randomLetter,
+      xPos,
+      290,
+      this.letterSpeed
+    );
     this.letters.push(newLetter);
   }
 
   update(time: number, delta: number): void {
-    this.letters.forEach((letter) => {
+    this.letters.forEach(letter => {
       letter.update(time, delta);
     });
   }
