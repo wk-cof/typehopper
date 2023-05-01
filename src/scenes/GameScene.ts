@@ -3,6 +3,7 @@ import Bunny from '../game-objects/Bunny';
 import Background from '../game-objects/Background';
 import Letters from '../game-objects/Letters';
 import ProgressBar from '../game-objects/ProgressBar';
+import { createHiddenInput } from '../utils/utils';
 
 export default class GameScene extends Phaser.Scene {
   private bunny!: Bunny;
@@ -29,7 +30,15 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.createHiddenInput();
+    createHiddenInput(event => {
+      const inputEvent = event as InputEvent;
+      const inputValue = (inputEvent.target as HTMLInputElement).value;
+
+      if (inputValue.length > 0) {
+        this.letterPressed = inputValue[inputValue.length - 1];
+        (inputEvent.target as HTMLInputElement).value = '';
+      }
+    });
     this.progressBar = new ProgressBar(this, 10);
     this.background.create();
     this.bunny.create();
@@ -37,9 +46,9 @@ export default class GameScene extends Phaser.Scene {
 
     this.letters = new Letters(this, this.letterSpeed);
     this.letters.createInitialLetters();
-    this.input.keyboard?.on('keyup', (event: any) => {
-      this.letterPressed = event.key;
-    });
+    // this.input.keyboard?.on('keyup', (event: any) => {
+    //   this.letterPressed = event.key;
+    // });
 
     // Play the background music
     this.backgroundMusic = this.sound.add('background-music', {
@@ -93,31 +102,5 @@ export default class GameScene extends Phaser.Scene {
     );
 
     return distance < 100;
-  }
-
-  createHiddenInput() {
-    const hiddenInput = document.createElement('input');
-    hiddenInput.type = 'text';
-    hiddenInput.style.position = 'absolute';
-    hiddenInput.style.top = '0';
-    hiddenInput.style.left = '0';
-    hiddenInput.style.opacity = '0.01';
-    hiddenInput.style.pointerEvents = 'auto';
-    hiddenInput.style.zIndex = '1000';
-    hiddenInput.autocapitalize = 'off';
-    hiddenInput.spellcheck = false;
-    document.body.appendChild(hiddenInput);
-    hiddenInput.focus();
-
-    // Listen to input events on the hidden input element
-    hiddenInput.addEventListener('input', event => {
-      const inputEvent = event as InputEvent;
-      const inputValue = (inputEvent.target as HTMLInputElement).value;
-
-      if (inputValue.length > 0) {
-        this.letterPressed = inputValue[inputValue.length - 1];
-        (inputEvent.target as HTMLInputElement).value = '';
-      }
-    });
   }
 }
