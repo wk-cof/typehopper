@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import Letter from './Letter';
-import { Habitat, animals, habitats } from '../utils/animal-dictionary';
+import { Habitat, habitats } from '../utils/animal-dictionary';
 import { AnimalEmoji } from './AnimalEmoji';
 import ProgressBar from './ProgressBar';
 
@@ -38,12 +38,11 @@ export default class Letters {
   createAnimalLetters(habitat: Habitat): void {
     const randomAnimal =
       habitat.animals[Math.floor(Math.random() * habitat.animals.length)];
-    this.currentAnimalName = randomAnimal.ru; // Choose the language, "en" for English, "ru" for Russian
+    this.currentAnimalName = randomAnimal.ru;
     for (let i = 0; i < this.currentAnimalName.length; i++) {
       this.createNewLetter(500 + i * 400, this.currentAnimalName[i]);
     }
 
-    // Display the animal emoji
     const emojiX = 50;
     const emojiY = 60;
     this.animalEmoji = new AnimalEmoji(
@@ -53,7 +52,6 @@ export default class Letters {
       randomAnimal.emoji
     );
 
-    // Create progress letters
     this.progressBar.createProgressLetters(this.letters);
   }
 
@@ -84,7 +82,6 @@ export default class Letters {
     const removedLetter = this.letters.shift();
     removedLetter?.destroy();
 
-    // Update progress letter
     this.progressBar.updateProgressLetter();
   }
 }

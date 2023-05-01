@@ -21,7 +21,7 @@ export default class Letter {
     // Generate a random color for the letter
     const randomColor = Phaser.Display.Color.RandomRGB().rgba;
 
-    this.text = this.scene.add.text(x, y, this.letter, {
+    this.text = this.scene.add.text(x, y, this.letter.toUpperCase(), {
       fontSize: '64px',
       color: randomColor,
       fontStyle: 'bold',

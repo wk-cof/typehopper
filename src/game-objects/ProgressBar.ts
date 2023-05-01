@@ -6,12 +6,10 @@ import Letter from './Letter';
 export default class ProgressBar {
   private scene: Phaser.Scene;
   private progressLetters: Array<Letter>;
-  private totalProgress: number;
   private progress: number;
 
-  constructor(scene: Phaser.Scene, totalProgress: number) {
+  constructor(scene: Phaser.Scene) {
     this.scene = scene;
-    this.totalProgress = totalProgress;
     this.progressLetters = [];
     this.progress = 0;
   }
@@ -34,8 +32,6 @@ export default class ProgressBar {
     if (this.progressLetters.length > 0) {
       this.progressLetters[this.progress].getGameObject().setColor('#00ff00');
       this.progress++;
-      // const removedLetter = this.progressLetters.shift();
-      // removedLetter?.destroy();
     }
   }
 
@@ -43,5 +39,9 @@ export default class ProgressBar {
     this.progressLetters.forEach(letter => {
       letter.update(time, delta);
     });
+  }
+
+  won() {
+    this.progressLetters.length === this.progress;
   }
 }

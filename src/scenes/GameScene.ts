@@ -12,7 +12,6 @@ export default class GameScene extends Phaser.Scene {
   private letterPressed: string | undefined;
   private letterSpeed = 150;
   private progressBar!: ProgressBar;
-  private lettersGuessed = 0;
   private backgroundMusic!: Phaser.Sound.BaseSound;
 
   constructor() {
@@ -39,10 +38,9 @@ export default class GameScene extends Phaser.Scene {
         (inputEvent.target as HTMLInputElement).value = '';
       }
     });
-    this.progressBar = new ProgressBar(this, 10);
+    this.progressBar = new ProgressBar(this);
     this.background.create();
     this.bunny.create();
-    // this.progressBar.draw(20, 20);
 
     this.letters = new Letters(this, this.letterSpeed, this.progressBar);
     this.input.keyboard?.on('keyup', (event: any) => {
@@ -51,8 +49,8 @@ export default class GameScene extends Phaser.Scene {
 
     // Play the background music
     this.backgroundMusic = this.sound.add('background-music', {
-      loop: true, // Set to loop the music
-      volume: 0.5, // Set the volume level (0-1)
+      loop: true,
+      volume: 0.5,
     });
     // this.backgroundMusic.play();
   }
@@ -64,7 +62,6 @@ export default class GameScene extends Phaser.Scene {
     if (!reachedLetter) {
       this.background.update(delta);
       this.letters.update(time, delta);
-      // this.progressBar.draw(20, 20);
       return;
     }
 
@@ -74,22 +71,11 @@ export default class GameScene extends Phaser.Scene {
         this.letters.getFirstLetter().letter.toLowerCase()
     ) {
       this.letters.removeFirstLetter();
-      // this.letters.addNewLetterAfterLast();
       this.bunny.hop();
       this.letterPressed = undefined;
-
-      // Update progress bar
-      this.lettersGuessed += 1;
-      // this.progressBar.updateProgress();
     }
 
-    // Check if progress is complete
-    if (this.lettersGuessed >= 10) {
-      console.log('Level complete!');
-      // Move to the next level or show a level complete screen
-    }
     this.bunny.update(time, delta);
-    // this.progressBar.draw(20, 20);
   }
 
   inJumpDistance(letter: Phaser.GameObjects.Text): boolean {
