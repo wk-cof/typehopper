@@ -4,6 +4,7 @@ import Background from '../game-objects/Background';
 import Letters from '../game-objects/Letters';
 import ProgressBar from '../game-objects/ProgressBar';
 import { createHiddenInput } from '../utils/utils';
+import { Animal, Habitat, habitats } from '../utils/animal-dictionary';
 
 export default class GameScene extends Phaser.Scene {
   private bunny!: Bunny;
@@ -29,6 +30,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
+    const animal = this.createRandomAnimal();
     createHiddenInput(event => {
       const inputEvent = event as InputEvent;
       const inputValue = (inputEvent.target as HTMLInputElement).value;
@@ -42,7 +44,12 @@ export default class GameScene extends Phaser.Scene {
     this.background.create();
     this.bunny.create();
 
-    this.letters = new Letters(this, this.letterSpeed, this.progressBar);
+    this.letters = new Letters(
+      this,
+      this.letterSpeed,
+      this.progressBar,
+      animal
+    );
     this.input.keyboard?.on('keyup', (event: any) => {
       this.letterPressed = event.key;
     });
@@ -87,5 +94,14 @@ export default class GameScene extends Phaser.Scene {
     );
 
     return distance < 100;
+  }
+
+  private createRandomAnimal(): Animal {
+    const randomHabitat = habitats[Math.floor(Math.random() * habitats.length)];
+    const randomAnimal =
+      randomHabitat.animals[
+        Math.floor(Math.random() * randomHabitat.animals.length)
+      ];
+    return randomAnimal;
   }
 }

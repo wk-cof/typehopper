@@ -2,11 +2,14 @@
 
 import Phaser from 'phaser';
 import Letter from './Letter';
+import { Animal } from '../utils/animal-dictionary';
+import { AnimalEmoji } from './AnimalEmoji';
 
 export default class ProgressBar {
   private scene: Phaser.Scene;
   private progressLetters: Array<Letter>;
   private progress: number;
+  private animalEmoji!: AnimalEmoji;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -14,7 +17,7 @@ export default class ProgressBar {
     this.progress = 0;
   }
 
-  createProgressLetters(letters: Array<Letter>): void {
+  createProgressLetters(letters: Array<Letter>, animal: Animal): void {
     letters.forEach((letter, index) => {
       const progressLetter = new Letter(
         this.scene,
@@ -26,6 +29,15 @@ export default class ProgressBar {
       progressLetter.getGameObject().setColor('#808080');
       this.progressLetters.push(progressLetter);
     });
+
+    const emojiX = 10;
+    const emojiY = 10;
+    this.animalEmoji = new AnimalEmoji(
+      this.scene,
+      emojiX,
+      emojiY,
+      animal.emoji
+    );
   }
 
   updateProgressLetter(): void {
