@@ -17,7 +17,7 @@ export default class ProgressBar {
     this.progress = 0;
   }
 
-  createProgressLetters(letters: Array<Letter>, animal: Animal): void {
+  create(letters: Array<Letter>, animal: Animal): void {
     letters.forEach((letter, index) => {
       const progressLetter = new Letter(
         this.scene,

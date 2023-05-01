@@ -44,12 +44,8 @@ export default class GameScene extends Phaser.Scene {
     this.background.create();
     this.bunny.create();
 
-    this.letters = new Letters(
-      this,
-      this.letterSpeed,
-      this.progressBar,
-      animal
-    );
+    this.letters = new Letters(this, this.letterSpeed, animal);
+    this.progressBar.create(this.letters.letters, animal);
     this.input.keyboard?.on('keyup', (event: any) => {
       this.letterPressed = event.key;
     });
@@ -78,6 +74,7 @@ export default class GameScene extends Phaser.Scene {
         this.letters.getFirstLetter().letter.toLowerCase()
     ) {
       this.letters.removeFirstLetter();
+      this.progressBar.updateProgressLetter();
       this.bunny.hop();
       this.letterPressed = undefined;
     }

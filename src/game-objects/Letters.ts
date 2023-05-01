@@ -2,26 +2,18 @@
 
 import Phaser from 'phaser';
 import Letter from './Letter';
-import { Animal, Habitat } from '../utils/animal-dictionary';
-import ProgressBar from './ProgressBar';
+import { Animal } from '../utils/animal-dictionary';
 
 export default class Letters {
   private scene: Phaser.Scene;
   private letterSpeed: number;
-  private letters: Array<Letter>;
+  public letters: Array<Letter>;
   private currentAnimalName!: string;
-  private progressBar!: ProgressBar;
 
-  constructor(
-    scene: Phaser.Scene,
-    letterSpeed: number,
-    progressBar: ProgressBar,
-    animal: Animal
-  ) {
+  constructor(scene: Phaser.Scene, letterSpeed: number, animal: Animal) {
     this.scene = scene;
     this.letterSpeed = letterSpeed;
     this.letters = [];
-    this.progressBar = progressBar;
     this.createAnimalLetters(animal);
   }
 
@@ -30,8 +22,6 @@ export default class Letters {
     for (let i = 0; i < this.currentAnimalName.length; i++) {
       this.createNewLetter(500 + i * 400, this.currentAnimalName[i]);
     }
-
-    this.progressBar.createProgressLetters(this.letters, animal);
   }
 
   private createNewLetter(x: number, letter: string): void {
@@ -59,7 +49,5 @@ export default class Letters {
   removeFirstLetter(): void {
     const removedLetter = this.letters.shift();
     removedLetter?.destroy();
-
-    this.progressBar.updateProgressLetter();
   }
 }
