@@ -17,7 +17,7 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { y: 450 },
     },
   },
-  scene: [GameMenuScene, GameScene],
+  scene: [GameScene, GameMenuScene],
 };
 
 const game = new Phaser.Game(config);

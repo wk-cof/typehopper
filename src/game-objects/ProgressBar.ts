@@ -22,7 +22,7 @@ export default class ProgressBar {
       const progressLetter = new Letter(
         this.scene,
         letter.letter,
-        50 + index * 40,
+        80 + index * 40,
         20,
         0
       );
@@ -30,8 +30,8 @@ export default class ProgressBar {
       this.progressLetters.push(progressLetter);
     });
 
-    const emojiX = 10;
-    const emojiY = 10;
+    const emojiX = 0;
+    const emojiY = 20;
     this.animalEmoji = new AnimalEmoji(
       this.scene,
       emojiX,

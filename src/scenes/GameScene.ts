@@ -4,7 +4,7 @@ import Background from '../game-objects/Background';
 import Letters from '../game-objects/Letters';
 import ProgressBar from '../game-objects/ProgressBar';
 import { createHiddenInput } from '../utils/utils';
-import { Animal, Habitat, habitats } from '../utils/animal-dictionary';
+import { Animal, habitats } from '../utils/animal-dictionary';
 
 export default class GameScene extends Phaser.Scene {
   private bunny!: Bunny;
