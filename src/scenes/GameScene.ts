@@ -12,6 +12,7 @@ export default class GameScene extends Phaser.Scene {
   private letterSpeed = 150;
   private progressBar!: ProgressBar;
   private lettersGuessed = 0;
+  private backgroundMusic!: Phaser.Sound.BaseSound;
 
   constructor() {
     super('game-scene');
@@ -23,6 +24,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.bunny.preload();
     this.background.preload();
+
+    this.load.audio('background-music', 'music/level-2-background.mp3');
   }
 
   create() {
@@ -37,6 +40,13 @@ export default class GameScene extends Phaser.Scene {
     this.input.keyboard?.on('keyup', (event: any) => {
       this.letterPressed = event.key;
     });
+
+    // Play the background music
+    this.backgroundMusic = this.sound.add('background-music', {
+      loop: true, // Set to loop the music
+      volume: 0.5, // Set the volume level (0-1)
+    });
+    this.backgroundMusic.play();
   }
 
   update(time: number, delta: number): void {
