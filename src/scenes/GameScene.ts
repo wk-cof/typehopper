@@ -42,9 +42,9 @@ export default class GameScene extends Phaser.Scene {
     this.progressBar = new ProgressBar(this, 10);
     this.background.create();
     this.bunny.create();
-    this.progressBar.draw(20, 20);
+    // this.progressBar.draw(20, 20);
 
-    this.letters = new Letters(this, this.letterSpeed);
+    this.letters = new Letters(this, this.letterSpeed, this.progressBar);
     this.input.keyboard?.on('keyup', (event: any) => {
       this.letterPressed = event.key;
     });
@@ -64,7 +64,7 @@ export default class GameScene extends Phaser.Scene {
     if (!reachedLetter) {
       this.background.update(delta);
       this.letters.update(time, delta);
-      this.progressBar.draw(20, 20);
+      // this.progressBar.draw(20, 20);
       return;
     }
 
@@ -80,7 +80,7 @@ export default class GameScene extends Phaser.Scene {
 
       // Update progress bar
       this.lettersGuessed += 1;
-      this.progressBar.updateProgress();
+      // this.progressBar.updateProgress();
     }
 
     // Check if progress is complete
@@ -89,7 +89,7 @@ export default class GameScene extends Phaser.Scene {
       // Move to the next level or show a level complete screen
     }
     this.bunny.update(time, delta);
-    this.progressBar.draw(20, 20);
+    // this.progressBar.draw(20, 20);
   }
 
   inJumpDistance(letter: Phaser.GameObjects.Text): boolean {

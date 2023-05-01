@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import Letter from './Letter';
 import { Habitat, animals, habitats } from '../utils/animal-dictionary';
 import { AnimalEmoji } from './AnimalEmoji';
+import ProgressBar from './ProgressBar';
 
 export default class Letters {
   private scene: Phaser.Scene;
@@ -9,11 +10,18 @@ export default class Letters {
   private letters: Array<Letter>;
   private currentAnimalName!: string;
   private animalEmoji!: AnimalEmoji;
+  private progressBar!: ProgressBar;
 
-  constructor(scene: Phaser.Scene, letterSpeed: number, habitat?: string) {
+  constructor(
+    scene: Phaser.Scene,
+    letterSpeed: number,
+    progressBar: ProgressBar,
+    habitat?: string
+  ) {
     this.scene = scene;
     this.letterSpeed = letterSpeed;
     this.letters = [];
+    this.progressBar = progressBar;
     if (habitat) {
       const specifiedHabitat = habitats.find(h => h.en === habitat);
       if (specifiedHabitat) {
@@ -44,6 +52,9 @@ export default class Letters {
       emojiY,
       randomAnimal.emoji
     );
+
+    // Create progress letters
+    this.progressBar.createProgressLetters(this.letters);
   }
 
   private createNewLetter(x: number, letter: string): void {
@@ -72,5 +83,8 @@ export default class Letters {
   removeFirstLetter(): void {
     const removedLetter = this.letters.shift();
     removedLetter?.destroy();
+
+    // Update progress letter
+    this.progressBar.updateProgressLetter();
   }
 }

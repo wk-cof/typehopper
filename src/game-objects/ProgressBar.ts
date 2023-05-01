@@ -1,90 +1,47 @@
 // ProgressBar.ts
 
 import Phaser from 'phaser';
+import Letter from './Letter';
 
 export default class ProgressBar {
   private scene: Phaser.Scene;
-  private bar: Phaser.GameObjects.Graphics;
-  private progress: number;
+  private progressLetters: Array<Letter>;
   private totalProgress: number;
+  private progress: number;
 
   constructor(scene: Phaser.Scene, totalProgress: number) {
     this.scene = scene;
     this.totalProgress = totalProgress;
+    this.progressLetters = [];
     this.progress = 0;
-    this.bar = this.scene.add.graphics({
-      lineStyle: { width: 0 },
-      fillStyle: { color: 0x808080 },
-    });
-    this.bar.setDepth(10); // Set the depth to a higher value to ensure it's drawn on top of other objects
   }
 
-  draw(x: number, y: number): void {
-    const backgroundColor = 0x778899;
-    this.bar.clear();
-
-    // Background
-    this.bar.fillStyle(backgroundColor, 1);
-    this.drawRoundedRect(x, y, 200, 20, 5);
-    this.bar.fillPath();
-
-    if (this.progress > 0) {
-      // Progress fill
-      this.bar.fillStyle(0x008000, 1);
-      this.drawRoundedRect(
-        x,
-        y,
-        (this.progress / this.totalProgress) * 200,
+  createProgressLetters(letters: Array<Letter>): void {
+    letters.forEach((letter, index) => {
+      const progressLetter = new Letter(
+        this.scene,
+        letter.letter,
+        50 + index * 40,
         20,
-        5
+        0
       );
-      this.bar.fillPath();
+      progressLetter.getGameObject().setColor('#808080');
+      this.progressLetters.push(progressLetter);
+    });
+  }
+
+  updateProgressLetter(): void {
+    if (this.progressLetters.length > 0) {
+      this.progressLetters[this.progress].getGameObject().setColor('#00ff00');
+      this.progress++;
+      // const removedLetter = this.progressLetters.shift();
+      // removedLetter?.destroy();
     }
   }
 
-  drawRoundedRect(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    cornerRadius: number
-  ): void {
-    this.bar.beginPath();
-    this.bar.arc(
-      x + cornerRadius,
-      y + cornerRadius,
-      cornerRadius,
-      Math.PI,
-      1.5 * Math.PI
-    );
-    this.bar.lineTo(x + width - cornerRadius, y);
-    this.bar.arc(
-      x + width - cornerRadius,
-      y + cornerRadius,
-      cornerRadius,
-      1.5 * Math.PI,
-      2 * Math.PI
-    );
-    this.bar.lineTo(x + width, y + height - cornerRadius);
-    this.bar.arc(
-      x + width - cornerRadius,
-      y + height - cornerRadius,
-      cornerRadius,
-      0,
-      0.5 * Math.PI
-    );
-    this.bar.lineTo(x + cornerRadius, y + height);
-    this.bar.arc(
-      x + cornerRadius,
-      y + height - cornerRadius,
-      cornerRadius,
-      0.5 * Math.PI,
-      Math.PI
-    );
-    this.bar.closePath();
-  }
-
-  updateProgress(): void {
-    this.progress += 1;
+  update(time: number, delta: number): void {
+    this.progressLetters.forEach(letter => {
+      letter.update(time, delta);
+    });
   }
 }
