@@ -4,7 +4,6 @@ import Background from '../game-objects/Background';
 import Letters from '../game-objects/Letters';
 import ProgressBar from '../game-objects/ProgressBar';
 import { createHiddenInput } from '../utils/utils';
-import { AnimalEmoji } from '../game-objects/AnimalEmoji';
 
 export default class GameScene extends Phaser.Scene {
   private bunny!: Bunny;
@@ -46,7 +45,6 @@ export default class GameScene extends Phaser.Scene {
     this.progressBar.draw(20, 20);
 
     this.letters = new Letters(this, this.letterSpeed);
-    // this.letters.createInitialLetters();
     this.input.keyboard?.on('keyup', (event: any) => {
       this.letterPressed = event.key;
     });
@@ -57,8 +55,6 @@ export default class GameScene extends Phaser.Scene {
       volume: 0.5, // Set the volume level (0-1)
     });
     // this.backgroundMusic.play();
-
-    const emoji = new AnimalEmoji(this, 400, 300, '🦁');
   }
 
   update(time: number, delta: number): void {
