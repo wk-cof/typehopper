@@ -1,32 +1,44 @@
 import Phaser from 'phaser';
 import Letter from './Letter';
+import { Habitat, animals, habitats } from '../utils/animal-dictionary';
 
 export default class Letters {
   private scene: Phaser.Scene;
   private letterSpeed: number;
   private letters: Array<Letter>;
+  private currentAnimalName!: string;
 
-  constructor(scene: Phaser.Scene, letterSpeed: number) {
+  constructor(scene: Phaser.Scene, letterSpeed: number, habitat?: string) {
     this.scene = scene;
     this.letterSpeed = letterSpeed;
     this.letters = [];
-  }
-
-  createInitialLetters(): void {
-    for (let i = 0; i < 4; i++) {
-      this.createNewLetter(500 + i * 400);
+    if (habitat) {
+      const specifiedHabitat = habitats.find(h => h.en === habitat);
+      if (specifiedHabitat) {
+        this.createInitialLetters(specifiedHabitat);
+      }
+    } else {
+      // create with a random habitat
+      this.createInitialLetters(
+        habitats[Math.floor(Math.random() * habitats.length)]
+      );
     }
   }
 
-  createNewLetter(x: number): void {
-    const letters = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
-    const randomLetter = letters.charAt(
-      Math.floor(Math.random() * letters.length)
-    );
+  createInitialLetters(habitat: Habitat): void {
+    const randomAnimal =
+      habitat.animals[Math.floor(Math.random() * habitat.animals.length)];
+    this.currentAnimalName = randomAnimal.ru; // Choose the language, "en" for English, "ru" for Russian
+    for (let i = 0; i < this.currentAnimalName.length; i++) {
+      this.createNewLetter(500 + i * 400, this.currentAnimalName[i]);
+    }
+  }
+
+  private createNewLetter(x: number, letter: string): void {
     const xPos = x;
     const newLetter = new Letter(
       this.scene,
-      randomLetter,
+      letter,
       xPos,
       290,
       this.letterSpeed
@@ -49,8 +61,8 @@ export default class Letters {
     removedLetter?.destroy();
   }
 
-  addNewLetterAfterLast(): void {
-    const lastLetter = this.letters[this.letters.length - 1].getGameObject().x;
-    this.createNewLetter(lastLetter + 400);
-  }
+  // addNewLetterAfterLast(): void {
+  //   const lastLetter = this.letters[this.letters.length - 1].getGameObject().x;
+  //   this.createNewLetter(lastLetter + 400);
+  // }
 }

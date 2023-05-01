@@ -133,7 +133,7 @@ const habitatNames: Record<string, HabitatInfo> = {
   wetlands: { en: 'wetlands', ru: 'водно-болотные угодья', emoji: '🌧️' },
 };
 
-const habitatInstances: Habitat[] = Object.keys(animals).map(key => {
+export const habitats: Habitat[] = Object.keys(animals).map(key => {
   const habitatInfo = habitatNames[key];
   const habitatAnimals = animals[key].map(
     animal =>
@@ -151,5 +151,3 @@ const habitatInstances: Habitat[] = Object.keys(animals).map(key => {
     habitatAnimals
   );
 });
-
-export default habitatInstances;
