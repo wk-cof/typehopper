@@ -5,10 +5,12 @@ export class AnimalEmoji extends Phaser.GameObjects.Text {
     const style = {
       fontSize: '64px',
       color: '#000000',
+      padding: { top: 20, bottom: 20, left: 20, right: 20 },
     };
 
     super(scene, x, y, emoji, style);
     scene.add.existing(this);
+    this.setOrigin(0.5, 0.5);
   }
 
   create() {
