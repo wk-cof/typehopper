@@ -34,7 +34,7 @@ export default class Letter {
     return this.text;
   }
 
-  update(time: number, delta: number): void {
+  update(_time: number, delta: number): void {
     this.text.x -= (this.letterSpeed * delta) / 1000;
   }
 

@@ -19,7 +19,7 @@ export default class Background {
   }[];
   private level: number;
 
-  constructor(scene: Phaser.Scene, scrollSpeed: number, level = 4) {
+  constructor(scene: Phaser.Scene, scrollSpeed: number, level = 1) {
     this.scene = scene;
     this.scrollSpeed = scrollSpeed;
     this.layers = [];

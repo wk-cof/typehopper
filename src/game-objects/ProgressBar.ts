@@ -51,6 +51,7 @@ export default class ProgressBar {
     this.progressLetters.forEach(letter => {
       letter.update(time, delta);
     });
+    this.animalEmoji.update();
   }
 
   won() {
