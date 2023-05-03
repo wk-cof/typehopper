@@ -17,33 +17,35 @@ export default class Background {
     image2: Phaser.GameObjects.Image;
     speed: number;
   }[];
+  private level: number;
 
-  constructor(scene: Phaser.Scene, scrollSpeed: number) {
+  constructor(scene: Phaser.Scene, scrollSpeed: number, level = 4) {
     this.scene = scene;
     this.scrollSpeed = scrollSpeed;
     this.layers = [];
+    this.level = level;
   }
 
   preload() {
     this.scene.load.image(
       SKY_KEY,
-      'assets/Cartoon_Forest_BG_01/Layers/Sky.png'
+      `assets/Cartoon_Forest_BG_0${this.level}/Layers/Sky.png`
     );
     this.scene.load.image(
       BG_DECOR_KEY,
-      'assets/Cartoon_Forest_BG_01/Layers/BG_Decor.png'
+      `assets/Cartoon_Forest_BG_0${this.level}/Layers/BG_Decor.png`
     );
     this.scene.load.image(
       MIDDLE_DECOR_KEY,
-      'assets/Cartoon_Forest_BG_01/Layers/Middle_Decor.png'
+      `assets/Cartoon_Forest_BG_0${this.level}/Layers/Middle_Decor.png`
     );
     this.scene.load.image(
       FOREGROUND_KEY,
-      'assets/Cartoon_Forest_BG_01/Layers/Foreground.png'
+      `assets/Cartoon_Forest_BG_0${this.level}/Layers/Foreground.png`
     );
     this.scene.load.image(
       GROUND_KEY,
-      'assets/Cartoon_Forest_BG_01/Layers/Ground.png'
+      `assets/Cartoon_Forest_BG_0${this.level}/Layers/Ground.png`
     );
   }
 

@@ -12,11 +12,11 @@ def resize_images(image_list, width, height, output_folder):
 
 def main():
     image_list = [
-      'public/assets/Cartoon_Forest_BG_01/Layers/Sky.png',
-      'public/assets/Cartoon_Forest_BG_01/Layers/BG_Decor.png',
-      'public/assets/Cartoon_Forest_BG_01/Layers/Middle_Decor.png',
-      'public/assets/Cartoon_Forest_BG_01/Layers/Foreground.png',
-      'public/assets/Cartoon_Forest_BG_01/Layers/Ground.png'
+      'public/assets/Cartoon_Forest_BG_04/Layers/Sky.png',
+      'public/assets/Cartoon_Forest_BG_04/Layers/BG_Decor.png',
+      'public/assets/Cartoon_Forest_BG_04/Layers/Middle_Decor.png',
+      'public/assets/Cartoon_Forest_BG_04/Layers/Foreground.png',
+      'public/assets/Cartoon_Forest_BG_04/Layers/Ground.png'
     ]
 
     width = 785 #int(input("Enter the width: "))
