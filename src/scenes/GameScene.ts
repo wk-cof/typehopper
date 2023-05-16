@@ -13,7 +13,7 @@ export default class GameScene extends Phaser.Scene {
   private letterPressed: string | undefined;
   private letterSpeed = 150;
   private progressBar!: ProgressBar;
-  private backgroundMusic!: Phaser.Sound.BaseSound;
+  // private backgroundMusic!: Phaser.Sound.BaseSound;
 
   constructor() {
     super('game-scene');
@@ -51,10 +51,10 @@ export default class GameScene extends Phaser.Scene {
     });
 
     // Play the background music
-    this.backgroundMusic = this.sound.add('background-music', {
-      loop: true,
-      volume: 0.5,
-    });
+    // this.backgroundMusic = this.sound.add('background-music', {
+    //   loop: true,
+    //   volume: 0.5,
+    // });
     // this.backgroundMusic.play();
   }
 

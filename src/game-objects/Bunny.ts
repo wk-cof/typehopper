@@ -28,7 +28,7 @@ export default class Bunny {
     this.physicsBunny.setCollideWorldBounds(true);
   }
 
-  update(time: number, delta: number): void {
+  update(_time: number, _delta: number): void {
     // nothing for now
   }
 
