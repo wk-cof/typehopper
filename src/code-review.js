@@ -1,5 +1,7 @@
-const fs = require('fs');
-const { Configuration, OpenAIApi } = require('openai');
+// code-review.js
+
+import fs from 'fs';
+import { Configuration, OpenAIApi } from 'openai';
 
 async function main() {
   const openai = new OpenAIApi(new Configuration({
