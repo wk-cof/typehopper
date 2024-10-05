@@ -1,0 +1,48 @@
+name: LLM Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for accurate diff
+
+    - name: Get pull request diff
+      run: |
+        git fetch origin ${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.ref }}
+        git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > diff.txt
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install openai
+
+    - name: Run code review script
+      run: python src/code-review.py
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+    - name: Post review as PR comment
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const review = fs.readFileSync('review.txt', 'utf8');
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: review
+          })
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
