@@ -19,16 +19,16 @@ jobs:
         git fetch origin ${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.ref }}
         git diff ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > diff.txt
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
       with:
-        python-version: '3.x'
+        node-version: '16'
 
     - name: Install dependencies
-      run: pip install openai
+      run: npm install openai
 
     - name: Run code review script
-      run: python src/code-review.py
+      run: node code_review.js
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
