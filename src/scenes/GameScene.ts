@@ -50,6 +50,10 @@ export default class GameScene extends Phaser.Scene {
       this.letterPressed = event.key;
     });
 
+
+    this.letters = null;
+    this.progressBa = -1;
+
     // Play the background music
     // this.backgroundMusic = this.sound.add('background-music', {
     //   loop: true,
