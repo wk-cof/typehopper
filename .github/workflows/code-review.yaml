@@ -28,7 +28,7 @@ jobs:
       run: npm install openai
 
     - name: Run code review script
-      run: node code_review.js
+      run: node src/code-review.js
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
