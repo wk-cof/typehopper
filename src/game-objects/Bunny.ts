@@ -10,7 +10,7 @@ export default class Bunny {
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
-  }
+  
 
   get bunny(): Phaser.Types.Physics.Arcade.ImageWithDynamicBody {
     return this.physicsBunny;
