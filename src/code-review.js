@@ -9,6 +9,7 @@ async function main() {
   }));
 
   let diffContent = fs.readFileSync('diff.txt', 'utf8');
+  let diffContent = null; // revert me
 
   // Truncate the diff if it's too long (adjust maxTokens as needed)
   const maxTokens = 4000; // Adjust based on model's token limit
