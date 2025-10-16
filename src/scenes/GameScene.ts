@@ -12,6 +12,12 @@ export default class GameScene extends Phaser.Scene {
   private letters!: Letters;
   private letterSpeed = 150;
   private progressBar!: ProgressBar;
+  private currentAnimal!: Animal;
+  private level = 1;
+  private levelComplete = false;
+  private levelCompleteText?: Phaser.GameObjects.Text;
+  private levelTransitionTimer?: Phaser.Time.TimerEvent;
+  private levelLabel!: Phaser.GameObjects.Text;
   // private backgroundMusic!: Phaser.Sound.BaseSound;
 
   constructor() {
@@ -29,7 +35,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    const animal = this.createRandomAnimal();
     createHiddenInput(event => {
       const inputEvent = event as InputEvent;
       const inputValue = (inputEvent.target as HTMLInputElement).value;
@@ -44,8 +49,16 @@ export default class GameScene extends Phaser.Scene {
     this.background.create();
     this.bunny.create();
 
-    this.letters = new Letters(this, this.letterSpeed, animal);
-    this.progressBar.create(this.letters.letters, animal);
+    const padding = 20;
+    this.levelLabel = this.add.text(this.scale.width - padding, padding, `Level ${this.level}`, {
+      fontSize: '28px',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 4,
+    }).setOrigin(1, 0);
+
+    this.startLevel();
+
     this.input.keyboard?.on('keyup', (event: KeyboardEvent) => {
       this.handleLetterInput(event.key);
     });
@@ -59,7 +72,12 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private handleLetterInput(rawInput: string): void {
-    if (!rawInput || rawInput.length !== 1 || !this.letters) {
+    if (
+      !rawInput ||
+      rawInput.length !== 1 ||
+      !this.letters ||
+      this.levelComplete
+    ) {
       return;
     }
 
@@ -72,11 +90,16 @@ export default class GameScene extends Phaser.Scene {
       this.letters.removeFirstLetter();
       this.progressBar.updateProgressLetter();
       this.bunny.hop();
+
+      if (this.letters.isEmpty()) {
+        this.completeLevel();
+      }
     }
   }
 
   update(time: number, delta: number): void {
-    const letterLockX = this.bunny.bunny.x + 40;
+    const bunnyRightEdge = this.bunny.bunny.x + this.bunny.bunny.displayWidth / 2;
+    const letterLockX = bunnyRightEdge + 30;
     this.background.update(delta);
     this.letters.update(time, delta, letterLockX);
     this.bunny.update();
@@ -89,5 +112,47 @@ export default class GameScene extends Phaser.Scene {
         Math.floor(Math.random() * randomHabitat.animals.length)
       ];
     return randomAnimal;
+  }
+
+  private startLevel(): void {
+    this.levelTransitionTimer?.remove();
+    this.levelTransitionTimer = undefined;
+    this.levelCompleteText?.destroy();
+    this.levelCompleteText = undefined;
+    this.levelComplete = false;
+
+    const nextAnimal = this.createRandomAnimal();
+    this.currentAnimal = nextAnimal;
+
+    if (this.letters) {
+      this.letters.destroyAll();
+    }
+
+    this.letters = new Letters(this, this.letterSpeed, this.currentAnimal);
+    this.progressBar.create(this.letters.letters, this.currentAnimal);
+    this.bunny.resetPosition();
+    this.levelLabel.setText(`Level ${this.level}`);
+  }
+
+  private completeLevel(): void {
+    if (this.levelComplete) {
+      return;
+    }
+
+    this.levelComplete = true;
+    this.levelCompleteText = this.add
+      .text(this.scale.width / 2, this.scale.height / 2, 'Level Complete!', {
+        fontSize: '48px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5, 0.5);
+
+    this.level += 1;
+
+    this.levelTransitionTimer = this.time.delayedCall(1500, () => {
+      this.startLevel();
+    });
   }
 }

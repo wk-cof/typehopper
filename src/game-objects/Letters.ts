@@ -36,7 +36,7 @@ export default class Letters {
     this.letters.push(newLetter);
   }
 
-  private static readonly LETTER_SPACING = 80;
+  private static readonly LETTER_PADDING = 30;
 
   update(time: number, delta: number, lockX?: number): void {
     this.letters.forEach((letter, index) => {
@@ -47,8 +47,7 @@ export default class Letters {
       } else if (index > 0) {
         const previousLetter = this.letters[index - 1];
         lockThreshold =
-          previousLetter.getGameObject().x +
-          Letters.LETTER_SPACING;
+          previousLetter.getRightEdge() + Letters.LETTER_PADDING;
       }
 
       letter.update(time, delta, lockThreshold);
@@ -62,5 +61,14 @@ export default class Letters {
   removeFirstLetter(): void {
     const removedLetter = this.letters.shift();
     removedLetter?.destroy();
+  }
+
+  destroyAll(): void {
+    this.letters.forEach(letter => letter.destroy());
+    this.letters = [];
+  }
+
+  isEmpty(): boolean {
+    return this.letters.length === 0;
   }
 }

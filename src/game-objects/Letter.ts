@@ -50,6 +50,14 @@ export default class Letter {
     return this.text;
   }
 
+  getWidth(): number {
+    return this.text.displayWidth;
+  }
+
+  getRightEdge(): number {
+    return this.text.x + this.text.displayWidth;
+  }
+
   destroy(): void {
     this.text.destroy();
   }

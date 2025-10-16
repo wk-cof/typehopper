@@ -9,7 +9,12 @@ export default class ProgressBar {
   private scene: Phaser.Scene;
   private progressLetters: Array<Letter>;
   private progress: number;
-  private animalEmoji!: AnimalEmoji;
+  private animalEmoji?: AnimalEmoji;
+  private static readonly LETTER_PADDING = 16;
+  private static readonly LETTER_Y = 40;
+  private static readonly EMOJI_X = 60;
+  private static readonly EMOJI_Y = 60;
+  private static readonly EMOJI_GAP = 20;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -18,26 +23,40 @@ export default class ProgressBar {
   }
 
   create(letters: Array<Letter>, animal: Animal): void {
-    letters.forEach((letter, index) => {
+    this.reset(letters, animal);
+  }
+
+  reset(letters: Array<Letter>, animal: Animal): void {
+    this.clearUI();
+    this.populate(letters, animal);
+  }
+
+  private populate(letters: Array<Letter>, animal: Animal): void {
+    this.animalEmoji = new AnimalEmoji(
+      this.scene,
+      ProgressBar.EMOJI_X,
+      ProgressBar.EMOJI_Y,
+      animal.emoji
+    );
+
+    let currentX =
+      this.animalEmoji.x +
+      this.animalEmoji.displayWidth / 2 +
+      ProgressBar.EMOJI_GAP;
+
+    letters.forEach(letter => {
       const progressLetter = new Letter(
         this.scene,
         letter.letter,
-        80 + index * 40,
-        20,
+        currentX,
+        ProgressBar.LETTER_Y,
         0
       );
       progressLetter.getGameObject().setColor('#808080');
       this.progressLetters.push(progressLetter);
+      currentX +=
+        progressLetter.getWidth() + ProgressBar.LETTER_PADDING;
     });
-
-    const emojiX = 40;
-    const emojiY = 50;
-    this.animalEmoji = new AnimalEmoji(
-      this.scene,
-      emojiX,
-      emojiY,
-      animal.emoji
-    );
   }
 
   updateProgressLetter(): void {
@@ -51,10 +70,18 @@ export default class ProgressBar {
     this.progressLetters.forEach(letter => {
       letter.update(time, delta);
     });
-    this.animalEmoji.update();
+    this.animalEmoji?.update();
   }
 
   won() {
     this.progressLetters.length === this.progress;
+  }
+
+  private clearUI(): void {
+    this.progressLetters.forEach(letter => letter.destroy());
+    this.progressLetters = [];
+    this.progress = 0;
+    this.animalEmoji?.destroy();
+    this.animalEmoji = undefined;
   }
 }

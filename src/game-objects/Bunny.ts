@@ -35,4 +35,13 @@ export default class Bunny {
   hop() {
     this.physicsBunny.setVelocityY(-300);
   }
+
+  resetPosition(): void {
+    if (!this.physicsBunny) {
+      return;
+    }
+
+    this.physicsBunny.setVelocity(0, 0);
+    this.physicsBunny.setPosition(this.defaultPosition.x, this.defaultPosition.y);
+  }
 }
