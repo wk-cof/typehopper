@@ -10,6 +10,7 @@ import {
   getHighestUnlockedLevel,
   setHighestUnlockedLevel,
 } from '../utils/progress';
+import { translate, translateText } from '../utils/localization';
 
 interface GameSceneInitData {
   levelId?: number;
@@ -169,7 +170,9 @@ export default class GameScene extends Phaser.Scene {
     const isFinalStage =
       this.stageIndex >= this.levelDefinition.animals.length - 1;
 
-    const message = isFinalStage ? 'Level Complete!' : 'Great job!';
+    const message = isFinalStage
+      ? translate('ui.game.levelComplete')
+      : translate('ui.game.greatJob');
 
     this.levelMessageText = this.add
       .text(this.scale.width / 2, this.scale.height / 2, message, {
@@ -213,8 +216,11 @@ export default class GameScene extends Phaser.Scene {
 
   private getLevelLabelText(): string {
     const totalStages = this.levelDefinition.animals.length;
-    return `Level ${this.levelDefinition.id + 1}: ${
-      this.levelDefinition.title
-    } (${this.stageIndex + 1}/${totalStages})`;
+    return translate('ui.game.levelLabel', {
+      levelNumber: this.levelDefinition.id + 1,
+      levelTitle: translateText(this.levelDefinition.title),
+      stage: this.stageIndex + 1,
+      totalStages,
+    });
   }
 }

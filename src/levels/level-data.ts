@@ -1,9 +1,10 @@
 import { Animal, getAnimalByEnglishName } from '../utils/animal-dictionary';
+import { LocalizedText } from '../utils/localization';
 
 export interface LevelDefinition {
   id: number;
-  title: string;
-  description: string;
+  title: LocalizedText;
+  description: LocalizedText;
   animals: Animal[];
   baseLetterSpeed: number;
   speedIncrement: number;
@@ -25,8 +26,14 @@ function animalsFromNames(names: string[]): Animal[] {
 export const LEVELS: LevelDefinition[] = [
   {
     id: 0,
-    title: 'Forest Friends',
-    description: 'Quick three to four letter words to get you hopping.',
+    title: {
+      en: 'Forest Friends',
+      ru: 'Лесные друзья',
+    },
+    description: {
+      en: 'Quick three to four letter words to get you hopping.',
+      ru: 'Быстрые слова из трёх-четырёх букв, чтобы размяться.',
+    },
     animals: animalsFromNames(['hedgehog', 'lion', 'wolf']),
     baseLetterSpeed: 120,
     speedIncrement: 10,
@@ -36,8 +43,14 @@ export const LEVELS: LevelDefinition[] = [
   },
   {
     id: 1,
-    title: 'Twilight Trees',
-    description: 'Slightly longer names to warm up your paws.',
+    title: {
+      en: 'Twilight Trees',
+      ru: 'Сумеречные деревья',
+    },
+    description: {
+      en: 'Slightly longer names to warm up your paws.',
+      ru: 'Чуть более длинные слова, чтобы размять лапы.',
+    },
     animals: animalsFromNames(['fox', 'owl', 'hare']),
     baseLetterSpeed: 130,
     speedIncrement: 15,
@@ -47,8 +60,14 @@ export const LEVELS: LevelDefinition[] = [
   },
   {
     id: 2,
-    title: 'Jungle Breeze',
-    description: 'Medium-length words that test your rhythm.',
+    title: {
+      en: 'Jungle Breeze',
+      ru: 'Джунглевая прохлада',
+    },
+    description: {
+      en: 'Medium-length words that test your rhythm.',
+      ru: 'Слова средней длины, проверяющие ваш ритм.',
+    },
     animals: animalsFromNames(['iguana', 'rabbit', 'jellyfish']),
     baseLetterSpeed: 150,
     speedIncrement: 15,
@@ -58,8 +77,14 @@ export const LEVELS: LevelDefinition[] = [
   },
   {
     id: 3,
-    title: 'Polar Gusts',
-    description: 'Seven-letter tongue twisters from chilly biomes.',
+    title: {
+      en: 'Polar Gusts',
+      ru: 'Полярные порывы',
+    },
+    description: {
+      en: 'Seven-letter tongue twisters from chilly biomes.',
+      ru: 'Семибуквенные скороговорки из холодных краёв.',
+    },
     animals: animalsFromNames(['penguin', 'rhinoceros', 'sloth']),
     baseLetterSpeed: 165,
     speedIncrement: 20,
@@ -69,8 +94,14 @@ export const LEVELS: LevelDefinition[] = [
   },
   {
     id: 4,
-    title: 'Desert Storm',
-    description: 'Eight-letter critters, stay focused!',
+    title: {
+      en: 'Desert Storm',
+      ru: 'Пустынная буря',
+    },
+    description: {
+      en: 'Eight-letter critters, stay focused!',
+      ru: 'Восьмибуквенные создания — сохраняйте концентрацию!',
+    },
     animals: animalsFromNames(['scorpion', 'crocodile', 'turtle']),
     baseLetterSpeed: 180,
     speedIncrement: 20,
@@ -80,8 +111,14 @@ export const LEVELS: LevelDefinition[] = [
   },
   {
     id: 5,
-    title: 'Savanna Sunrise',
-    description: 'The longest names—finish the journey!',
+    title: {
+      en: 'Savanna Sunrise',
+      ru: 'Рассвет саванны',
+    },
+    description: {
+      en: 'The longest names—finish the journey!',
+      ru: 'Самые длинные имена — доведите путешествие до конца!',
+    },
     animals: animalsFromNames(['orangutan', 'hippopotamus', 'chimpanzee']),
     baseLetterSpeed: 195,
     speedIncrement: 25,

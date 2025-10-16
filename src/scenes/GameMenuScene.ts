@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { translate } from '../utils/localization';
 
 export default class GameMenuScene extends Phaser.Scene {
   constructor() {
@@ -17,7 +18,7 @@ export default class GameMenuScene extends Phaser.Scene {
     const startButton = this.add.text(
       this.scale.width / 2,
       this.scale.height / 2,
-      'Start Game',
+      translate('ui.game.start'),
       {
         fontSize: '32px',
         color: '#000',
