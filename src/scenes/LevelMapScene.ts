@@ -114,7 +114,7 @@ export default class LevelMapScene extends Phaser.Scene {
 
       container.setSize(NODE_RADIUS * 2, NODE_RADIUS * 2);
       container.setInteractive(
-        new Phaser.Geom.Circle(0, 0, NODE_RADIUS),
+        new Phaser.Geom.Circle(NODE_RADIUS/2 + 20, NODE_RADIUS/2 + 20, NODE_RADIUS * 1.2),
         Phaser.Geom.Circle.Contains
       );
 
