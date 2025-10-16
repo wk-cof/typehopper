@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+diff.txt
+test.js
 *.local
 
 # Editor directories and files
@@ -25,3 +27,4 @@ dist-ssr
 
 # Secrets
 openapi.key
+.env
