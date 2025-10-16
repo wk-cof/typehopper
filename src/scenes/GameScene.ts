@@ -4,7 +4,17 @@ import Background from '../game-objects/Background';
 import Letters from '../game-objects/Letters';
 import ProgressBar from '../game-objects/ProgressBar';
 import { createHiddenInput } from '../utils/utils';
-import { Animal, habitats } from '../utils/animal-dictionary';
+import { Animal } from '../utils/animal-dictionary';
+import { LEVELS, LevelDefinition, getLevelById } from '../levels/level-data';
+import {
+  getHighestUnlockedLevel,
+  setHighestUnlockedLevel,
+} from '../utils/progress';
+
+interface GameSceneInitData {
+  levelId?: number;
+  highestUnlockedLevel?: number;
+}
 
 export default class GameScene extends Phaser.Scene {
   private bunny!: Bunny;
@@ -13,20 +23,34 @@ export default class GameScene extends Phaser.Scene {
   private letterSpeed = 150;
   private progressBar!: ProgressBar;
   private currentAnimal!: Animal;
-  private level = 1;
-  private levelComplete = false;
-  private levelCompleteText?: Phaser.GameObjects.Text;
-  private levelTransitionTimer?: Phaser.Time.TimerEvent;
+  private levelDefinition!: LevelDefinition;
+  private stageIndex = 0;
+  private stageTransitioning = false;
+  private levelMessageText?: Phaser.GameObjects.Text;
+  private transitionTimer?: Phaser.Time.TimerEvent;
   private levelLabel!: Phaser.GameObjects.Text;
-  // private backgroundMusic!: Phaser.Sound.BaseSound;
+  private highestUnlockedLevel = 0;
 
   constructor() {
     super('game-scene');
   }
 
-  preload() {
+  init(data: GameSceneInitData): void {
+    const levelId = data.levelId ?? 0;
+    this.levelDefinition = getLevelById(levelId);
+    this.highestUnlockedLevel =
+      data.highestUnlockedLevel ?? getHighestUnlockedLevel();
+    this.stageIndex = 0;
+    this.letterSpeed = this.levelDefinition.baseLetterSpeed;
+  }
+
+  preload(): void {
     this.bunny = new Bunny(this);
-    this.background = new Background(this, this.letterSpeed);
+    this.background = new Background(
+      this,
+      this.letterSpeed,
+      this.levelDefinition.backgroundVariant
+    );
 
     this.bunny.preload();
     this.background.preload();
@@ -34,7 +58,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.audio('background-music', 'music/level-2-background.mp3');
   }
 
-  create() {
+  create(): void {
     createHiddenInput(event => {
       const inputEvent = event as InputEvent;
       const inputValue = (inputEvent.target as HTMLInputElement).value;
@@ -45,30 +69,44 @@ export default class GameScene extends Phaser.Scene {
         (inputEvent.target as HTMLInputElement).value = '';
       }
     });
+
     this.progressBar = new ProgressBar(this);
     this.background.create();
     this.bunny.create();
 
     const padding = 20;
-    this.levelLabel = this.add.text(this.scale.width - padding, padding, `Level ${this.level}`, {
-      fontSize: '28px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 4,
-    }).setOrigin(1, 0);
+    this.levelLabel = this.add
+      .text(
+        this.scale.width - padding,
+        padding,
+        this.getLevelLabelText(),
+        {
+          fontSize: '28px',
+          color: '#ffffff',
+          stroke: '#000000',
+          strokeThickness: 4,
+        }
+      )
+      .setOrigin(1, 0);
 
-    this.startLevel();
+    this.startStage();
 
     this.input.keyboard?.on('keyup', (event: KeyboardEvent) => {
       this.handleLetterInput(event.key);
     });
+  }
 
-    // Play the background music
-    // this.backgroundMusic = this.sound.add('background-music', {
-    //   loop: true,
-    //   volume: 0.5,
-    // });
-    // this.backgroundMusic.play();
+  update(time: number, delta: number): void {
+    if (!this.letters) {
+      return;
+    }
+
+    const bunnyRightEdge =
+      this.bunny.bunny.x + this.bunny.bunny.displayWidth / 2;
+    const letterLockX = bunnyRightEdge + 30;
+    this.background.update(delta);
+    this.letters.update(time, delta, letterLockX);
+    this.bunny.update();
   }
 
   private handleLetterInput(rawInput: string): void {
@@ -76,7 +114,7 @@ export default class GameScene extends Phaser.Scene {
       !rawInput ||
       rawInput.length !== 1 ||
       !this.letters ||
-      this.levelComplete
+      this.stageTransitioning
     ) {
       return;
     }
@@ -92,37 +130,24 @@ export default class GameScene extends Phaser.Scene {
       this.bunny.hop();
 
       if (this.letters.isEmpty()) {
-        this.completeLevel();
+        this.completeStage();
       }
     }
   }
 
-  update(time: number, delta: number): void {
-    const bunnyRightEdge = this.bunny.bunny.x + this.bunny.bunny.displayWidth / 2;
-    const letterLockX = bunnyRightEdge + 30;
-    this.background.update(delta);
-    this.letters.update(time, delta, letterLockX);
-    this.bunny.update();
-  }
+  private startStage(): void {
+    this.transitionTimer?.remove();
+    this.transitionTimer = undefined;
+    this.levelMessageText?.destroy();
+    this.levelMessageText = undefined;
+    this.stageTransitioning = false;
 
-  private createRandomAnimal(): Animal {
-    const randomHabitat = habitats[Math.floor(Math.random() * habitats.length)];
-    const randomAnimal =
-      randomHabitat.animals[
-        Math.floor(Math.random() * randomHabitat.animals.length)
-      ];
-    return randomAnimal;
-  }
+    this.currentAnimal = this.levelDefinition.animals[this.stageIndex];
+    this.letterSpeed =
+      this.levelDefinition.baseLetterSpeed +
+      this.stageIndex * this.levelDefinition.speedIncrement;
 
-  private startLevel(): void {
-    this.levelTransitionTimer?.remove();
-    this.levelTransitionTimer = undefined;
-    this.levelCompleteText?.destroy();
-    this.levelCompleteText = undefined;
-    this.levelComplete = false;
-
-    const nextAnimal = this.createRandomAnimal();
-    this.currentAnimal = nextAnimal;
+    this.background.setScrollSpeed(this.letterSpeed);
 
     if (this.letters) {
       this.letters.destroyAll();
@@ -131,17 +156,23 @@ export default class GameScene extends Phaser.Scene {
     this.letters = new Letters(this, this.letterSpeed, this.currentAnimal);
     this.progressBar.create(this.letters.letters, this.currentAnimal);
     this.bunny.resetPosition();
-    this.levelLabel.setText(`Level ${this.level}`);
+    this.levelLabel.setText(this.getLevelLabelText());
   }
 
-  private completeLevel(): void {
-    if (this.levelComplete) {
+  private completeStage(): void {
+    if (this.stageTransitioning) {
       return;
     }
 
-    this.levelComplete = true;
-    this.levelCompleteText = this.add
-      .text(this.scale.width / 2, this.scale.height / 2, 'Level Complete!', {
+    this.stageTransitioning = true;
+
+    const isFinalStage =
+      this.stageIndex >= this.levelDefinition.animals.length - 1;
+
+    const message = isFinalStage ? 'Level Complete!' : 'Great job!';
+
+    this.levelMessageText = this.add
+      .text(this.scale.width / 2, this.scale.height / 2, message, {
         fontSize: '48px',
         color: '#ffffff',
         stroke: '#000000',
@@ -149,10 +180,41 @@ export default class GameScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0.5);
 
-    this.level += 1;
+    const delay = isFinalStage ? 1800 : 1200;
 
-    this.levelTransitionTimer = this.time.delayedCall(1500, () => {
-      this.startLevel();
+    if (isFinalStage) {
+      this.unlockNextLevel();
+      this.transitionTimer = this.time.delayedCall(delay, () => {
+        this.scene.start('level-map-scene', {
+          lastCompletedLevelId: this.levelDefinition.id,
+        });
+      });
+      return;
+    }
+
+    this.transitionTimer = this.time.delayedCall(delay, () => {
+      this.stageIndex += 1;
+      this.startStage();
     });
+  }
+
+  private unlockNextLevel(): void {
+    const nextLevelIndex = Math.min(
+      this.levelDefinition.id + 1,
+      LEVELS.length - 1
+    );
+    const currentStored = this.highestUnlockedLevel;
+
+    if (nextLevelIndex > currentStored) {
+      setHighestUnlockedLevel(nextLevelIndex);
+      this.highestUnlockedLevel = nextLevelIndex;
+    }
+  }
+
+  private getLevelLabelText(): string {
+    const totalStages = this.levelDefinition.animals.length;
+    return `Level ${this.levelDefinition.id + 1}: ${
+      this.levelDefinition.title
+    } (${this.stageIndex + 1}/${totalStages})`;
   }
 }

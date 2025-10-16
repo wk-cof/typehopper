@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import GameScene from './scenes/GameScene';
 import GameMenuScene from './scenes/GameMenuScene';
+import LevelMapScene from './scenes/LevelMapScene';
 
 export const LEVEL_DIMENSIONS = {
   x: 780,
@@ -17,7 +18,7 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { y: 450 },
     },
   },
-  scene: [GameScene, GameMenuScene],
+  scene: [LevelMapScene, GameScene, GameMenuScene],
 };
 
 const game = new Phaser.Game(config);

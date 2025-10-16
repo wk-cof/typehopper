@@ -133,3 +133,21 @@ export const habitats: Habitat[] = Object.keys(animals).map(key => {
     habitatAnimals
   );
 });
+
+export const allAnimals: Animal[] = habitats.flatMap(habitat => habitat.animals);
+
+const animalsByEnglishName: Map<string, Animal> = new Map();
+const animalsByRussianName: Map<string, Animal> = new Map();
+
+allAnimals.forEach(animal => {
+  animalsByEnglishName.set(animal.en.toLowerCase(), animal);
+  animalsByRussianName.set(animal.ru.toLowerCase(), animal);
+});
+
+export function getAnimalByEnglishName(name: string): Animal | undefined {
+  return animalsByEnglishName.get(name.toLowerCase());
+}
+
+export function getAnimalByRussianName(name: string): Animal | undefined {
+  return animalsByRussianName.get(name.toLowerCase());
+}

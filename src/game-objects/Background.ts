@@ -105,4 +105,8 @@ export default class Background {
       }
     });
   }
+
+  setScrollSpeed(speed: number): void {
+    this.scrollSpeed = speed;
+  }
 }
