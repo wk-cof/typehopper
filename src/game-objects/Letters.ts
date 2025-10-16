@@ -36,13 +36,26 @@ export default class Letters {
     this.letters.push(newLetter);
   }
 
-  update(time: number, delta: number): void {
-    this.letters.forEach(letter => {
-      letter.update(time, delta);
+  private static readonly LETTER_SPACING = 80;
+
+  update(time: number, delta: number, lockX?: number): void {
+    this.letters.forEach((letter, index) => {
+      let lockThreshold: number | undefined;
+
+      if (typeof lockX === 'number' && index === 0) {
+        lockThreshold = lockX;
+      } else if (index > 0) {
+        const previousLetter = this.letters[index - 1];
+        lockThreshold =
+          previousLetter.getGameObject().x +
+          Letters.LETTER_SPACING;
+      }
+
+      letter.update(time, delta, lockThreshold);
     });
   }
 
-  getFirstLetter(): Letter {
+  getFirstLetter(): Letter | undefined {
     return this.letters[0];
   }
 

@@ -34,7 +34,15 @@ export default class Letter {
     return this.text;
   }
 
-  update(_time: number, delta: number): void {
+  update(_time: number, delta: number, lockThreshold?: number): void {
+    if (
+      typeof lockThreshold === 'number' &&
+      this.text.x <= lockThreshold
+    ) {
+      this.text.x = lockThreshold;
+      return;
+    }
+
     this.text.x -= (this.letterSpeed * delta) / 1000;
   }
 

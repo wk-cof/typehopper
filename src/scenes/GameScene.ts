@@ -10,7 +10,6 @@ export default class GameScene extends Phaser.Scene {
   private bunny!: Bunny;
   private background!: Background;
   private letters!: Letters;
-  private letterPressed: string | undefined;
   private letterSpeed = 150;
   private progressBar!: ProgressBar;
   // private backgroundMusic!: Phaser.Sound.BaseSound;
@@ -36,7 +35,8 @@ export default class GameScene extends Phaser.Scene {
       const inputValue = (inputEvent.target as HTMLInputElement).value;
 
       if (inputValue.length > 0) {
-        this.letterPressed = inputValue[inputValue.length - 1];
+        const lastCharacter = inputValue[inputValue.length - 1];
+        this.handleLetterInput(lastCharacter);
         (inputEvent.target as HTMLInputElement).value = '';
       }
     });
@@ -46,8 +46,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.letters = new Letters(this, this.letterSpeed, animal);
     this.progressBar.create(this.letters.letters, animal);
-    this.input.keyboard?.on('keyup', (event: any) => {
-      this.letterPressed = event.key;
+    this.input.keyboard?.on('keyup', (event: KeyboardEvent) => {
+      this.handleLetterInput(event.key);
     });
 
     // Play the background music
@@ -58,39 +58,28 @@ export default class GameScene extends Phaser.Scene {
     // this.backgroundMusic.play();
   }
 
-  update(time: number, delta: number): void {
-    const reachedLetter = this.inJumpDistance(
-      this.letters.getFirstLetter().getGameObject()
-    );
-    if (!reachedLetter) {
-      this.background.update(delta);
-      this.letters.update(time, delta);
+  private handleLetterInput(rawInput: string): void {
+    if (!rawInput || rawInput.length !== 1 || !this.letters) {
       return;
     }
 
-    if (
-      this.letterPressed &&
-      this.letterPressed.toLowerCase() ===
-        this.letters.getFirstLetter().letter.toLowerCase()
-    ) {
+    const firstLetter = this.letters.getFirstLetter();
+    if (!firstLetter) {
+      return;
+    }
+
+    if (rawInput.toLowerCase() === firstLetter.letter.toLowerCase()) {
       this.letters.removeFirstLetter();
       this.progressBar.updateProgressLetter();
       this.bunny.hop();
-      this.letterPressed = undefined;
     }
-
-    this.bunny.update(time, delta);
   }
 
-  inJumpDistance(letter: Phaser.GameObjects.Text): boolean {
-    const distance = Phaser.Math.Distance.Between(
-      this.bunny.bunny.x,
-      this.bunny.bunny.y,
-      letter.x,
-      letter.y
-    );
-
-    return distance < 100;
+  update(time: number, delta: number): void {
+    const letterLockX = this.bunny.bunny.x + 40;
+    this.background.update(delta);
+    this.letters.update(time, delta, letterLockX);
+    this.bunny.update();
   }
 
   private createRandomAnimal(): Animal {
