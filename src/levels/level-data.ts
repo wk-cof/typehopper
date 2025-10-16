@@ -38,7 +38,7 @@ export const LEVELS: LevelDefinition[] = [
     baseLetterSpeed: 120,
     speedIncrement: 10,
     backgroundVariant: 1,
-    mapPosition: { x: 110, y: 300 },
+    mapPosition: { x: 110, y: 260 },
     badgeEmoji: '🌱',
   },
   {

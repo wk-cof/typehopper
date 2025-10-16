@@ -61,14 +61,16 @@ export default class LevelMapScene extends Phaser.Scene {
   }
 
   create() {
+    const titlePaddingX = 60;
+
     this.titleText = this.add
-      .text(this.scale.width / 2, 40, translate('ui.levelMap.title'), {
+      .text(titlePaddingX, 40, translate('ui.levelMap.title'), {
         fontSize: '38px',
         color: '#ffffff',
         stroke: '#000000',
         strokeThickness: 6,
       })
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0, 0.5);
 
     this.descriptionText = this.add
       .text(this.scale.width / 2, this.scale.height - 60, '', {
