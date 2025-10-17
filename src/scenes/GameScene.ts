@@ -5,12 +5,17 @@ import Letters from '../game-objects/Letters';
 import ProgressBar from '../game-objects/ProgressBar';
 import { createHiddenInput } from '../utils/utils';
 import { Animal } from '../utils/animal-dictionary';
-import { LEVELS, LevelDefinition, getLevelById } from '../levels/level-data';
+import {
+  LEVELS,
+  LevelDefinition,
+  getLevelAnimals,
+  getLevelById,
+} from '../levels/level-data';
 import {
   getHighestUnlockedLevel,
   setHighestUnlockedLevel,
 } from '../utils/progress';
-import { translate, translateText } from '../utils/localization';
+import { getLanguage, translate, translateText } from '../utils/localization';
 
 interface GameSceneInitData {
   levelId?: number;
@@ -25,6 +30,7 @@ export default class GameScene extends Phaser.Scene {
   private progressBar!: ProgressBar;
   private currentAnimal!: Animal;
   private levelDefinition!: LevelDefinition;
+  private levelAnimals: Animal[] = [];
   private stageIndex = 0;
   private stageTransitioning = false;
   private levelMessageText?: Phaser.GameObjects.Text;
@@ -39,6 +45,7 @@ export default class GameScene extends Phaser.Scene {
   init(data: GameSceneInitData): void {
     const levelId = data.levelId ?? 0;
     this.levelDefinition = getLevelById(levelId);
+    this.levelAnimals = getLevelAnimals(this.levelDefinition, getLanguage());
     this.highestUnlockedLevel =
       data.highestUnlockedLevel ?? getHighestUnlockedLevel();
     this.stageIndex = 0;
@@ -137,13 +144,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private startStage(): void {
+    this.levelAnimals = getLevelAnimals(this.levelDefinition, getLanguage());
     this.transitionTimer?.remove();
     this.transitionTimer = undefined;
     this.levelMessageText?.destroy();
     this.levelMessageText = undefined;
     this.stageTransitioning = false;
 
-    this.currentAnimal = this.levelDefinition.animals[this.stageIndex];
+    this.currentAnimal = this.levelAnimals[this.stageIndex];
     this.letterSpeed =
       this.levelDefinition.baseLetterSpeed +
       this.stageIndex * this.levelDefinition.speedIncrement;
@@ -168,7 +176,7 @@ export default class GameScene extends Phaser.Scene {
     this.stageTransitioning = true;
 
     const isFinalStage =
-      this.stageIndex >= this.levelDefinition.animals.length - 1;
+      this.stageIndex >= this.levelAnimals.length - 1;
 
     const message = isFinalStage
       ? translate('ui.game.levelComplete')
@@ -215,7 +223,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private getLevelLabelText(): string {
-    const totalStages = this.levelDefinition.animals.length;
+    const totalStages = this.levelAnimals.length;
     return translate('ui.game.levelLabel', {
       levelNumber: this.levelDefinition.id + 1,
       levelTitle: translateText(this.levelDefinition.title),

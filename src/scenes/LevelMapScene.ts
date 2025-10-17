@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { LEVELS, LevelDefinition } from '../levels/level-data';
+import { LEVELS, LevelDefinition, getLevelAnimals } from '../levels/level-data';
 import {
   getHighestUnlockedLevel,
   setHighestUnlockedLevel,
@@ -179,7 +179,8 @@ export default class LevelMapScene extends Phaser.Scene {
   }
 
   private updateLevelHoverText(level: LevelDefinition, unlocked: boolean): void {
-    const animalPreview = level.animals.map(animal => animal.emoji).join(' ');
+    const animals = getLevelAnimals(level, getLanguage());
+    const animalPreview = animals.map(animal => animal.emoji).join(' ');
     this.descriptionText.setText(
       `${translateText(level.title)}\n${translateText(level.description)}\n${animalPreview}`
     );

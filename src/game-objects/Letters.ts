@@ -3,12 +3,16 @@
 import Phaser from 'phaser';
 import Letter from './Letter';
 import { Animal } from '../utils/animal-dictionary';
+import { getLanguage, LanguageCode } from '../utils/localization';
 
 export default class Letters {
   private scene: Phaser.Scene;
   private letterSpeed: number;
   public letters: Array<Letter>;
   private currentAnimalName!: string;
+  private static readonly LETTER_PADDING = 30;
+  private static readonly START_X = 500;
+  private static readonly LETTER_X_SPACING = 400;
 
   constructor(scene: Phaser.Scene, letterSpeed: number, animal: Animal) {
     this.scene = scene;
@@ -18,10 +22,14 @@ export default class Letters {
   }
 
   createAnimalLetters(animal: Animal): void {
-    this.currentAnimalName = animal.ru;
-    for (let i = 0; i < this.currentAnimalName.length; i++) {
-      this.createNewLetter(500 + i * 400, this.currentAnimalName[i]);
-    }
+    const language = getLanguage();
+    this.currentAnimalName = Letters.getAnimalNameByLanguage(animal, language);
+
+    Array.from(this.currentAnimalName).forEach((character, index) => {
+      const xPosition =
+        Letters.START_X + index * Letters.LETTER_X_SPACING;
+      this.createNewLetter(xPosition, character);
+    });
   }
 
   private createNewLetter(x: number, letter: string): void {
@@ -35,8 +43,6 @@ export default class Letters {
     );
     this.letters.push(newLetter);
   }
-
-  private static readonly LETTER_PADDING = 30;
 
   update(time: number, delta: number, lockX?: number): void {
     this.letters.forEach((letter, index) => {
@@ -70,5 +76,15 @@ export default class Letters {
 
   isEmpty(): boolean {
     return this.letters.length === 0;
+  }
+
+  private static getAnimalNameByLanguage(
+    animal: Animal,
+    language: LanguageCode
+  ): string {
+    if (language === 'ru') {
+      return animal.ru;
+    }
+    return animal.en;
   }
 }

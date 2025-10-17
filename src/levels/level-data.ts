@@ -1,11 +1,15 @@
-import { Animal, getAnimalByEnglishName } from '../utils/animal-dictionary';
-import { LocalizedText } from '../utils/localization';
+import {
+  Animal,
+  getAnimalByEnglishName,
+  getAnimalByRussianName,
+} from '../utils/animal-dictionary';
+import { LanguageCode, LocalizedText } from '../utils/localization';
 
 export interface LevelDefinition {
   id: number;
   title: LocalizedText;
   description: LocalizedText;
-  animals: Animal[];
+  animalsByLanguage: Record<LanguageCode, Animal[]>;
   baseLetterSpeed: number;
   speedIncrement: number;
   backgroundVariant: number;
@@ -13,14 +17,32 @@ export interface LevelDefinition {
   badgeEmoji: string;
 }
 
-function animalsFromNames(names: string[]): Animal[] {
-  return names.map(name => {
-    const animal = getAnimalByEnglishName(name);
-    if (!animal) {
-      throw new Error(`Unknown animal: ${name}`);
-    }
-    return animal;
-  });
+export function getLevelAnimals(
+  level: LevelDefinition,
+  language: LanguageCode
+): Animal[] {
+  return level.animalsByLanguage[language] ?? level.animalsByLanguage.en;
+}
+
+function animalsByLanguageFromNames(
+  localizedNames: Record<LanguageCode, string[]>
+): Record<LanguageCode, Animal[]> {
+  return {
+    en: localizedNames.en.map(name => {
+      const animal = getAnimalByEnglishName(name);
+      if (!animal) {
+        throw new Error(`Unknown English animal: ${name}`);
+      }
+      return animal;
+    }),
+    ru: localizedNames.ru.map(name => {
+      const animal = getAnimalByRussianName(name);
+      if (!animal) {
+        throw new Error(`Unknown Russian animal: ${name}`);
+      }
+      return animal;
+    }),
+  };
 }
 
 export const LEVELS: LevelDefinition[] = [
@@ -34,7 +56,10 @@ export const LEVELS: LevelDefinition[] = [
       en: 'Quick three to four letter words to get you hopping.',
       ru: 'Быстрые слова из трёх-четырёх букв, чтобы размяться.',
     },
-    animals: animalsFromNames(['hedgehog', 'lion', 'wolf']),
+    animalsByLanguage: animalsByLanguageFromNames({
+      en: ['fox', 'owl', 'wolf'],
+      ru: ['ёж', 'лев', 'волк'],
+    }),
     baseLetterSpeed: 120,
     speedIncrement: 10,
     backgroundVariant: 1,
@@ -51,7 +76,10 @@ export const LEVELS: LevelDefinition[] = [
       en: 'Slightly longer names to warm up your paws.',
       ru: 'Чуть более длинные слова, чтобы размять лапы.',
     },
-    animals: animalsFromNames(['fox', 'owl', 'hare']),
+    animalsByLanguage: animalsByLanguageFromNames({
+      en: ['deer', 'bear', 'zebra'],
+      ru: ['лиса', 'сова', 'заяц'],
+    }),
     baseLetterSpeed: 130,
     speedIncrement: 15,
     backgroundVariant: 2,
@@ -68,7 +96,10 @@ export const LEVELS: LevelDefinition[] = [
       en: 'Medium-length words that test your rhythm.',
       ru: 'Слова средней длины, проверяющие ваш ритм.',
     },
-    animals: animalsFromNames(['iguana', 'rabbit', 'jellyfish']),
+    animalsByLanguage: animalsByLanguageFromNames({
+      en: ['shark', 'turtle', 'dolphin'],
+      ru: ['игуана', 'кролик', 'медуза'],
+    }),
     baseLetterSpeed: 150,
     speedIncrement: 15,
     backgroundVariant: 3,
@@ -85,7 +116,10 @@ export const LEVELS: LevelDefinition[] = [
       en: 'Seven-letter tongue twisters from chilly biomes.',
       ru: 'Семибуквенные скороговорки из холодных краёв.',
     },
-    animals: animalsFromNames(['penguin', 'rhinoceros', 'sloth']),
+    animalsByLanguage: animalsByLanguageFromNames({
+      en: ['penguin', 'reindeer', 'narwhal'],
+      ru: ['пингвин', 'носорог', 'ленивец'],
+    }),
     baseLetterSpeed: 165,
     speedIncrement: 20,
     backgroundVariant: 4,
@@ -102,7 +136,10 @@ export const LEVELS: LevelDefinition[] = [
       en: 'Eight-letter critters, stay focused!',
       ru: 'Восьмибуквенные создания — сохраняйте концентрацию!',
     },
-    animals: animalsFromNames(['scorpion', 'crocodile', 'turtle']),
+    animalsByLanguage: animalsByLanguageFromNames({
+      en: ['camel', 'fennec', 'lizard'],
+      ru: ['скорпион', 'крокодил', 'черепаха'],
+    }),
     baseLetterSpeed: 180,
     speedIncrement: 20,
     backgroundVariant: 1,
@@ -119,7 +156,10 @@ export const LEVELS: LevelDefinition[] = [
       en: 'The longest names—finish the journey!',
       ru: 'Самые длинные имена — доведите путешествие до конца!',
     },
-    animals: animalsFromNames(['orangutan', 'hippopotamus', 'chimpanzee']),
+    animalsByLanguage: animalsByLanguageFromNames({
+      en: ['elephant', 'giraffe', 'wildebeest'],
+      ru: ['орангутан', 'гиппопотам', 'шимпанзе'],
+    }),
     baseLetterSpeed: 195,
     speedIncrement: 25,
     backgroundVariant: 2,
