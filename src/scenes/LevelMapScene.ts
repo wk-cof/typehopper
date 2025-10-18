@@ -23,12 +23,26 @@ interface LevelMapSceneData {
 }
 
 const NODE_RADIUS = 40;
-const LOCKED_COLOR = 0x666666;
-const UNLOCKED_COLOR = 0x66ccff;
-const ACTIVE_COLOR = 0xffcc33;
 const PATH_COLOR = 0xfaf0c6;
 const MAP_BACKGROUND_KEY = 'map-background';
 const MAP_DIMENSIONS = { width: 1152, height: 768 };
+const LEVEL_OUTLINE_COLORS: number[] = [
+  0x5ecb70, // forest
+  0x2d7a5a, // pine
+  0x39bcd1, // waterfall
+  0x6ec8ff, // ice
+  0xf0b458, // desert
+  0xd89c42, // savanna
+];
+const LOCKED_OUTLINE_COLOR = 0x5a6576;
+const LANGUAGE_TOGGLE_CONFIG = {
+  offsetX: -320,
+  offsetY: 48,
+  minWidth: 200,
+  height: 44,
+  labelPadding: 16,
+  optionSpacing: 18,
+};
 
 export default class LevelMapScene extends Phaser.Scene {
   private descriptionText!: Phaser.GameObjects.Text;
@@ -43,8 +57,8 @@ export default class LevelMapScene extends Phaser.Scene {
   private hoveredLevelId: number | null = null;
   private hoveredLevelUnlocked = false;
   private languageChangeCleanup?: () => void;
-  private readonly languageTogglePadding = 18;
-  private readonly languageToggleY = 30;
+  private languageToggleOffsetX = LANGUAGE_TOGGLE_CONFIG.offsetX;
+  private languageToggleOffsetY = LANGUAGE_TOGGLE_CONFIG.offsetY;
 
   constructor() {
     super('level-map-scene');
@@ -176,38 +190,38 @@ export default class LevelMapScene extends Phaser.Scene {
       const container = this.add.container(level.mapPosition.x, level.mapPosition.y);
       container.setDepth(5);
 
-      const circle = this.add.circle(0, 0, NODE_RADIUS, unlocked ? UNLOCKED_COLOR : LOCKED_COLOR);
-      circle.setStrokeStyle(6, index === this.highestUnlockedLevel ? ACTIVE_COLOR : 0x222222);
+      const outlineColor = LEVEL_OUTLINE_COLORS[index] ?? LEVEL_OUTLINE_COLORS[LEVEL_OUTLINE_COLORS.length - 1];
+      const isActive = unlocked && index === this.highestUnlockedLevel;
+      const strokeWidth = isActive ? 9 : 6;
+      const strokeColor = unlocked ? outlineColor : LOCKED_OUTLINE_COLOR;
+      const strokeAlpha = unlocked ? 1 : 0.6;
 
-      const emojiText = this.add
-        .text(0, -10, level.badgeEmoji, { fontSize: '32px' })
-        .setOrigin(0.5, 0.5);
+      const circle = this.add.circle(0, 0, NODE_RADIUS, 0xffffff, 0);
+      circle.setStrokeStyle(strokeWidth, strokeColor, strokeAlpha);
+      circle.setDepth(4);
 
       const numberText = this.add
-        .text(0, 25, '', {
-          fontSize: '18px',
-          color: unlocked ? '#000000' : '#bbbbbb',
+        .text(0, 0, '', {
+          fontSize: '20px',
+          color: unlocked ? '#ffffff' : '#d0d3db',
           fontStyle: 'bold',
         })
         .setOrigin(0.5, 0.5);
+      numberText.setShadow(0, 0, '#000000', 6, true, true);
       this.levelNumberTexts.set(level.id, numberText);
 
-      container.add([circle, emojiText, numberText]);
+      container.add([circle, numberText]);
 
       const hitRadius = NODE_RADIUS + 24;
       container.setSize(hitRadius * 2, hitRadius * 2);
-      // don't change the first 2 params in the Geom.Circle constructor, they are used for the hitbox
-      // setting 0 is incorrect!
-      container.setInteractive(
-        new Phaser.Geom.Circle(NODE_RADIUS, NODE_RADIUS, hitRadius),
-        Phaser.Geom.Circle.Contains
-      );
+      container.setInteractive(new Phaser.Geom.Circle(0, 0, hitRadius), Phaser.Geom.Circle.Contains);
       if (container.input) {
         container.input.cursor = 'pointer';
       }
 
       container.on('pointerover', () => {
-        circle.setScale(1.08);
+        circle.setScale(1.05);
+        numberText.setScale(1.05);
         this.hoveredLevelId = level.id;
         this.hoveredLevelUnlocked = unlocked;
         this.updateLevelHoverText(level, unlocked);
@@ -215,6 +229,7 @@ export default class LevelMapScene extends Phaser.Scene {
 
       container.on('pointerout', () => {
         circle.setScale(1);
+        numberText.setScale(1);
         this.descriptionText.setText('');
         this.lockedHintText.setText('');
         this.hoveredLevelId = null;
@@ -249,19 +264,31 @@ export default class LevelMapScene extends Phaser.Scene {
     this.languageToggleContainer?.destroy(true);
     this.languageTexts.clear();
 
-    this.languageToggleContainer = this.add.container(0, this.languageToggleY);
+    this.languageToggleContainer = this.add.container(0, 0);
     this.languageToggleContainer.setDepth(100);
 
     this.languageToggleBackground = this.add
-      .rectangle(0, 0, 220, 40, 0x000000, 0.45)
+      .rectangle(
+        0,
+        0,
+        LANGUAGE_TOGGLE_CONFIG.minWidth,
+        LANGUAGE_TOGGLE_CONFIG.height,
+        0x000000,
+        0.45
+      )
       .setOrigin(0, 0);
     this.languageToggleBackground.setStrokeStyle(1, 0xffffff, 0.15);
 
     this.languageLabelText = this.add
-      .text(12, 20, '', {
-        fontSize: '16px',
-        color: '#ffffff',
-      })
+      .text(
+        LANGUAGE_TOGGLE_CONFIG.labelPadding,
+        LANGUAGE_TOGGLE_CONFIG.height / 2,
+        '',
+        {
+          fontSize: '16px',
+          color: '#ffffff',
+        }
+      )
       .setOrigin(0, 0.5);
 
     this.languageToggleContainer.add([this.languageToggleBackground, this.languageLabelText]);
@@ -269,10 +296,15 @@ export default class LevelMapScene extends Phaser.Scene {
     const languages = getSupportedLanguages();
     languages.forEach(language => {
       const languageText = this.add
-        .text(0, 20, '', {
-          fontSize: '16px',
-          color: '#dddddd',
-        })
+        .text(
+          0,
+          LANGUAGE_TOGGLE_CONFIG.height / 2,
+          '',
+          {
+            fontSize: '16px',
+            color: '#dddddd',
+          }
+        )
         .setOrigin(0, 0.5)
         .setInteractive({ useHandCursor: true });
 
@@ -291,11 +323,11 @@ export default class LevelMapScene extends Phaser.Scene {
     const activeLanguage = getLanguage();
 
     this.languageLabelText.setText(`${translate('ui.languageToggle.label')}:`);
-    const labelLeft = 12;
+    const labelLeft = LANGUAGE_TOGGLE_CONFIG.labelPadding;
     this.languageLabelText.setX(labelLeft);
     const labelRight = labelLeft + this.languageLabelText.displayWidth;
 
-    let offsetX = labelRight + 16;
+    let offsetX = labelRight + LANGUAGE_TOGGLE_CONFIG.optionSpacing;
     const languages = getSupportedLanguages();
     languages.forEach(language => {
       const languageText = this.languageTexts.get(language);
@@ -313,15 +345,18 @@ export default class LevelMapScene extends Phaser.Scene {
       languageText.setColor(language === activeLanguage ? '#ffcc33' : '#dddddd');
       languageText.setX(offsetX);
 
-      offsetX += languageText.displayWidth + 14;
+      offsetX += languageText.displayWidth + LANGUAGE_TOGGLE_CONFIG.optionSpacing;
     });
 
-    const totalWidth = offsetX + 12;
-    this.languageToggleBackground.width = Math.max(totalWidth, 160);
-    this.languageToggleBackground.height = 40;
+    const totalWidth = offsetX + LANGUAGE_TOGGLE_CONFIG.labelPadding;
+    this.languageToggleBackground.width = Math.max(
+      totalWidth,
+      LANGUAGE_TOGGLE_CONFIG.minWidth
+    );
+    this.languageToggleBackground.height = LANGUAGE_TOGGLE_CONFIG.height;
     const toggleX =
-      this.scale.width - this.languageToggleBackground.width - this.languageTogglePadding - 80;
-    const toggleY = this.languageToggleY + 10;
+      this.scale.width - this.languageToggleBackground.width + this.languageToggleOffsetX;
+    const toggleY = this.languageToggleOffsetY;
     this.languageToggleContainer.setPosition(toggleX, toggleY);
 
     this.levelNumberTexts.forEach((text, levelId) => {

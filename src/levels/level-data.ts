@@ -63,7 +63,7 @@ export const LEVELS: LevelDefinition[] = [
     baseLetterSpeed: 120,
     speedIncrement: 10,
     backgroundVariant: 1,
-    mapPosition: { x: 220, y: 630 },
+    mapPosition: { x: 220, y: 640 },
     badgeEmoji: '🌱',
   },
   {
@@ -83,7 +83,7 @@ export const LEVELS: LevelDefinition[] = [
     baseLetterSpeed: 130,
     speedIncrement: 15,
     backgroundVariant: 2,
-    mapPosition: { x: 250, y: 345 },
+    mapPosition: { x: 255, y: 345 },
     badgeEmoji: '🌲',
   },
   {
@@ -103,7 +103,7 @@ export const LEVELS: LevelDefinition[] = [
     baseLetterSpeed: 150,
     speedIncrement: 15,
     backgroundVariant: 3,
-    mapPosition: { x: 530, y: 240 },
+    mapPosition: { x: 533, y: 240 },
     badgeEmoji: '🍃',
   },
   {
@@ -123,7 +123,7 @@ export const LEVELS: LevelDefinition[] = [
     baseLetterSpeed: 165,
     speedIncrement: 20,
     backgroundVariant: 4,
-    mapPosition: { x: 570, y: 475 },
+    mapPosition: { x: 571, y: 480 },
     badgeEmoji: '❄️',
   },
   {
@@ -143,7 +143,7 @@ export const LEVELS: LevelDefinition[] = [
     baseLetterSpeed: 180,
     speedIncrement: 20,
     backgroundVariant: 1,
-    mapPosition: { x: 845, y: 300 },
+    mapPosition: { x: 845, y: 290 },
     badgeEmoji: '🏜️',
   },
   {
