@@ -5,6 +5,7 @@ import Letters from '../game-objects/Letters';
 import ProgressBar from '../game-objects/ProgressBar';
 import { createHiddenInput } from '../utils/utils';
 import { Animal } from '../utils/animal-dictionary';
+import { LEVEL_DIMENSIONS } from '../game';
 import {
   LEVELS,
   LevelDefinition,
@@ -67,6 +68,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.resizeForGameplay();
     createHiddenInput(event => {
       const inputEvent = event as InputEvent;
       const inputValue = (inputEvent.target as HTMLInputElement).value;
@@ -230,5 +232,17 @@ export default class GameScene extends Phaser.Scene {
       stage: this.stageIndex + 1,
       totalStages,
     });
+  }
+
+  private resizeForGameplay(): void {
+    if (
+      this.scale.width !== LEVEL_DIMENSIONS.x ||
+      this.scale.height !== LEVEL_DIMENSIONS.y
+    ) {
+      this.scale.setGameSize(LEVEL_DIMENSIONS.x, LEVEL_DIMENSIONS.y);
+      this.scale.refresh();
+    }
+    this.cameras.main.setViewport(0, 0, LEVEL_DIMENSIONS.x, LEVEL_DIMENSIONS.y);
+    this.cameras.main.setSize(LEVEL_DIMENSIONS.x, LEVEL_DIMENSIONS.y);
   }
 }
