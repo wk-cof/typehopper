@@ -103,7 +103,7 @@ export default class GameScene extends Phaser.Scene {
     this.background.create();
     this.bunny.create();
 
-    const padding = 20;
+    const padding = 8;
     this.levelLabel = this.add
       .text(
         this.scale.width - padding,
@@ -234,8 +234,8 @@ export default class GameScene extends Phaser.Scene {
 
   private createExitControls(): void {
     const padding = 20;
-    const buttonWidth = 160;
-    const buttonHeight = 44;
+    const buttonWidth = 60;
+    const buttonHeight = 40;
 
     const background = this.add
       .rectangle(0, 0, buttonWidth, buttonHeight, 0x000000, 0.55)
@@ -243,11 +243,11 @@ export default class GameScene extends Phaser.Scene {
       .setStrokeStyle(2, 0xffffff, 0.6);
 
     const label = this.add
-      .text(0, 0, translate('ui.game.exit'), {
-        fontSize: '20px',
+      .text(0, 0, 'X', {
+        fontSize: '26px',
         color: '#ffffff',
         stroke: '#000000',
-        strokeThickness: 3,
+        strokeThickness: 2,
       })
       .setOrigin(0.5, 0.5);
 
@@ -261,8 +261,8 @@ export default class GameScene extends Phaser.Scene {
     container.setSize(buttonWidth, buttonHeight);
     container.setInteractive(
       new Phaser.Geom.Rectangle(
-        0,
-        0,
+        -buttonWidth / 2,
+        -buttonHeight / 2,
         buttonWidth,
         buttonHeight
       ),
