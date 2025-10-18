@@ -17,6 +17,8 @@ import {
   setHighestUnlockedLevel,
 } from '../utils/progress';
 import { getLanguage, translate, translateText } from '../utils/localization';
+import CarrotCollectible from '../game-objects/CarrotCollectible';
+import Letter from '../game-objects/Letter';
 
 // Scoring awards 10 points per correctly typed letter and a 50 point bonus per completed stage.
 const LETTER_POINTS = 10;
@@ -44,6 +46,8 @@ export default class GameScene extends Phaser.Scene {
   private highestUnlockedLevel = 0;
   private score = 0;
   private scoreText?: Phaser.GameObjects.Text;
+  private activeCollectibles = new Set<CarrotCollectible>();
+  private pendingStageCompletion = false;
 
   constructor() {
     super('game-scene');
@@ -58,6 +62,8 @@ export default class GameScene extends Phaser.Scene {
     this.stageIndex = 0;
     this.letterSpeed = this.levelDefinition.baseLetterSpeed;
     this.score = 0;
+    this.pendingStageCompletion = false;
+    this.activeCollectibles.clear();
   }
 
   preload(): void {
@@ -70,6 +76,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.bunny.preload();
     this.background.preload();
+    this.load.image('carrot-coin', 'assets/carrot.png');
 
     this.load.audio('background-music', 'music/level-2-background.mp3');
   }
@@ -157,13 +164,19 @@ export default class GameScene extends Phaser.Scene {
     }
 
     if (rawInput.toLowerCase() === firstLetter.letter.toLowerCase()) {
-      this.letters.removeFirstLetter();
+      const removedLetter = this.letters.removeFirstLetter();
+      if (!removedLetter) {
+        return;
+      }
+
+      this.launchCollectibleFromLetter(removedLetter);
       this.progressBar.updateProgressLetter();
-      this.bunny.hop();
       this.addScore(LETTER_POINTS);
 
-      if (this.letters.isEmpty()) {
+      this.pendingStageCompletion = this.letters.isEmpty();
+      if (this.pendingStageCompletion && this.activeCollectibles.size === 0) {
         this.completeStage();
+        this.pendingStageCompletion = false;
       }
     }
   }
@@ -187,10 +200,13 @@ export default class GameScene extends Phaser.Scene {
       this.letters.destroyAll();
     }
 
+    this.clearCollectibles();
+
     this.letters = new Letters(this, this.letterSpeed, this.currentAnimal);
     this.progressBar.create(this.letters.letters, this.currentAnimal);
     this.bunny.resetPosition();
     this.levelLabel.setText(this.getLevelLabelText());
+    this.pendingStageCompletion = false;
   }
 
   private completeStage(): void {
@@ -267,6 +283,60 @@ export default class GameScene extends Phaser.Scene {
 
   private getScoreLabelText(): string {
     return translate('ui.game.score', { score: this.score });
+  }
+
+  private launchCollectibleFromLetter(letter: Letter): void {
+    const gameObject = letter.getGameObject();
+    const startPoint = new Phaser.Math.Vector2(
+      gameObject.x,
+      gameObject.y
+    );
+    letter.destroy();
+
+    const catchPoint = this.bunny.getCatchPoint().clone();
+    const collectible = new CarrotCollectible(
+      this,
+      startPoint,
+      catchPoint,
+      () => {
+        this.activeCollectibles.delete(collectible);
+        this.onCollectibleArrived(catchPoint.clone());
+      }
+    );
+
+    this.activeCollectibles.add(collectible);
+  }
+
+  private onCollectibleArrived(position: Phaser.Math.Vector2): void {
+    this.spawnCollectibleBurst(position);
+    this.bunny.consumeCollectible();
+
+    if (this.pendingStageCompletion && this.activeCollectibles.size === 0) {
+      this.completeStage();
+      this.pendingStageCompletion = false;
+    }
+  }
+
+  private spawnCollectibleBurst(position: Phaser.Math.Vector2): void {
+    const emitter = this.add.particles(position.x, position.y, 'carrot-coin', {
+      lifespan: 260,
+      speed: { min: 120, max: 220 },
+      angle: { min: 200, max: 340 },
+      scale: { start: 0.25, end: 0.05 },
+      gravityY: 320,
+      emitting: false,
+    });
+    emitter.setDepth(6);
+    emitter.explode(6, position.x, position.y);
+
+    this.time.delayedCall(260, () => {
+      emitter.destroy();
+    });
+  }
+
+  private clearCollectibles(): void {
+    this.activeCollectibles.forEach(collectible => collectible.cancel());
+    this.activeCollectibles.clear();
   }
 
   private resizeForGameplay(): void {

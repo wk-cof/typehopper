@@ -64,9 +64,8 @@ export default class Letters {
     return this.letters[0];
   }
 
-  removeFirstLetter(): void {
-    const removedLetter = this.letters.shift();
-    removedLetter?.destroy();
+  removeFirstLetter(): Letter | undefined {
+    return this.letters.shift();
   }
 
   destroyAll(): void {

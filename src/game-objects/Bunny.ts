@@ -7,6 +7,7 @@ export default class Bunny {
   private scene: Phaser.Scene;
   private physicsBunny!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   private defaultPosition = new Phaser.Math.Vector2(100, LEVEL_DIMENSIONS.y - 100);
+  private chompTween?: Phaser.Tweens.Tween;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -36,6 +37,46 @@ export default class Bunny {
     this.physicsBunny.setVelocityY(-300);
   }
 
+  consumeCollectible(): void {
+    if (!this.physicsBunny) {
+      return;
+    }
+
+    this.hop();
+
+    const startX = this.physicsBunny.x;
+    this.chompTween?.stop();
+    this.chompTween = this.scene.tweens.add({
+      targets: this.physicsBunny,
+      x: startX + 28,
+      duration: 140,
+      ease: 'Sine.easeOut',
+      yoyo: true,
+    });
+
+    this.scene.tweens.add({
+      targets: this.physicsBunny,
+      scale: { from: 0.1, to: 0.115 },
+      duration: 120,
+      ease: 'Sine.easeOut',
+      yoyo: true,
+    });
+  }
+
+  getCatchPoint(): Phaser.Math.Vector2 {
+    if (!this.physicsBunny) {
+      return this.defaultPosition.clone();
+    }
+
+    const forwardOffset = this.physicsBunny.displayWidth * 0.6;
+    const verticalOffset = this.physicsBunny.displayHeight * 0.35;
+
+    return new Phaser.Math.Vector2(
+      this.physicsBunny.x + forwardOffset,
+      this.physicsBunny.y - verticalOffset
+    );
+  }
+
   resetPosition(): void {
     if (!this.physicsBunny) {
       return;
@@ -43,5 +84,6 @@ export default class Bunny {
 
     this.physicsBunny.setVelocity(0, 0);
     this.physicsBunny.setPosition(this.defaultPosition.x, this.defaultPosition.y);
+    this.physicsBunny.setScale(0.1);
   }
 }
