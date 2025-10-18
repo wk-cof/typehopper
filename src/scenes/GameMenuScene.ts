@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { LEVEL_DIMENSIONS } from '../game';
 import { translate } from '../utils/localization';
 
 export default class GameMenuScene extends Phaser.Scene {
@@ -11,6 +12,16 @@ export default class GameMenuScene extends Phaser.Scene {
   }
 
   create() {
+    if (
+      this.scale.width !== LEVEL_DIMENSIONS.x ||
+      this.scale.height !== LEVEL_DIMENSIONS.y
+    ) {
+      this.scale.setGameSize(LEVEL_DIMENSIONS.x, LEVEL_DIMENSIONS.y);
+      this.scale.refresh();
+    }
+    this.cameras.main.setViewport(0, 0, LEVEL_DIMENSIONS.x, LEVEL_DIMENSIONS.y);
+    this.cameras.main.setSize(LEVEL_DIMENSIONS.x, LEVEL_DIMENSIONS.y);
+
     // Add background image here
     this.add.image(0, 0, 'menu-background').setOrigin(0, 0);
 

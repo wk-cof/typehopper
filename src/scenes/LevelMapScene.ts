@@ -1,5 +1,9 @@
 import Phaser from 'phaser';
-import { LEVELS, LevelDefinition, getLevelAnimals } from '../levels/level-data';
+import {
+  LEVELS,
+  LevelDefinition,
+  getLevelAnimals,
+} from '../levels/level-data';
 import {
   getHighestUnlockedLevel,
   setHighestUnlockedLevel,
@@ -22,7 +26,9 @@ const NODE_RADIUS = 40;
 const LOCKED_COLOR = 0x666666;
 const UNLOCKED_COLOR = 0x66ccff;
 const ACTIVE_COLOR = 0xffcc33;
-const PATH_COLOR = 0xffffff;
+const PATH_COLOR = 0xfaf0c6;
+const MAP_BACKGROUND_KEY = 'map-background';
+const MAP_DIMENSIONS = { width: 1152, height: 768 };
 
 export default class LevelMapScene extends Phaser.Scene {
   private descriptionText!: Phaser.GameObjects.Text;
@@ -57,10 +63,19 @@ export default class LevelMapScene extends Phaser.Scene {
   }
 
   preload() {
+    this.loadBackground();
     this.cameras.main.setBackgroundColor('#1b2f33');
   }
 
+  private loadBackground(): void {
+    if (!this.textures.exists(MAP_BACKGROUND_KEY)) {
+      this.load.image(MAP_BACKGROUND_KEY, 'assets/map/map.png');
+    }
+  }
+
   create() {
+    this.resizeForMap();
+    this.createBackground();
     const titlePaddingX = 60;
 
     this.titleText = this.add
@@ -70,7 +85,8 @@ export default class LevelMapScene extends Phaser.Scene {
         stroke: '#000000',
         strokeThickness: 6,
       })
-      .setOrigin(0, 0.5);
+      .setOrigin(0, 0.5)
+      .setDepth(10);
 
     this.descriptionText = this.add
       .text(this.scale.width / 2, this.scale.height - 60, '', {
@@ -79,14 +95,16 @@ export default class LevelMapScene extends Phaser.Scene {
         align: 'center',
         wordWrap: { width: this.scale.width - 80 },
       })
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setDepth(10);
 
     this.lockedHintText = this.add
       .text(this.scale.width / 2, this.scale.height - 30, '', {
         fontSize: '18px',
         color: '#ffaaaa',
       })
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setDepth(10);
 
     this.drawPaths();
     this.createNodes();
@@ -101,9 +119,40 @@ export default class LevelMapScene extends Phaser.Scene {
     });
   }
 
+  private resizeForMap(): void {
+    if (
+      this.scale.width !== MAP_DIMENSIONS.width ||
+      this.scale.height !== MAP_DIMENSIONS.height
+    ) {
+      this.scale.setGameSize(MAP_DIMENSIONS.width, MAP_DIMENSIONS.height);
+      this.scale.refresh();
+    }
+    this.cameras.main.setViewport(0, 0, MAP_DIMENSIONS.width, MAP_DIMENSIONS.height);
+    this.cameras.main.setSize(MAP_DIMENSIONS.width, MAP_DIMENSIONS.height);
+  }
+
+  private createBackground(): void {
+    if (!this.textures.exists(MAP_BACKGROUND_KEY)) {
+      return;
+    }
+    const texture = this.textures.get(MAP_BACKGROUND_KEY);
+    const source = texture.getSourceImage() as HTMLImageElement | HTMLCanvasElement;
+    const width = source ? source.width : this.scale.width;
+    const height = source ? source.height : this.scale.height;
+
+    const background = this.add
+      .image(this.scale.width / 2, this.scale.height / 2, MAP_BACKGROUND_KEY)
+      .setOrigin(0.5, 0.5);
+
+    const scale = Math.max(this.scale.width / width, this.scale.height / height);
+    background.setDisplaySize(width * scale, height * scale);
+    background.setDepth(-20);
+  }
+
   private drawPaths(): void {
     const graphics = this.add.graphics();
-    graphics.lineStyle(4, PATH_COLOR, 0.5);
+    graphics.setDepth(-5);
+    graphics.lineStyle(6, PATH_COLOR, 0.85);
 
     LEVELS.forEach((level, index) => {
       if (index === 0) {
@@ -125,6 +174,7 @@ export default class LevelMapScene extends Phaser.Scene {
     LEVELS.forEach((level, index) => {
       const unlocked = index <= this.highestUnlockedLevel;
       const container = this.add.container(level.mapPosition.x, level.mapPosition.y);
+      container.setDepth(5);
 
       const circle = this.add.circle(0, 0, NODE_RADIUS, unlocked ? UNLOCKED_COLOR : LOCKED_COLOR);
       circle.setStrokeStyle(6, index === this.highestUnlockedLevel ? ACTIVE_COLOR : 0x222222);
@@ -144,11 +194,17 @@ export default class LevelMapScene extends Phaser.Scene {
 
       container.add([circle, emojiText, numberText]);
 
-      container.setSize(NODE_RADIUS * 2, NODE_RADIUS * 2);
+      const hitRadius = NODE_RADIUS + 24;
+      container.setSize(hitRadius * 2, hitRadius * 2);
+      // don't change the first 2 params in the Geom.Circle constructor, they are used for the hitbox
+      // setting 0 is incorrect!
       container.setInteractive(
-        new Phaser.Geom.Circle(NODE_RADIUS/2 + 20, NODE_RADIUS/2 + 20, NODE_RADIUS * 1.2),
+        new Phaser.Geom.Circle(NODE_RADIUS, NODE_RADIUS, hitRadius),
         Phaser.Geom.Circle.Contains
       );
+      if (container.input) {
+        container.input.cursor = 'pointer';
+      }
 
       container.on('pointerover', () => {
         circle.setScale(1.08);
@@ -263,10 +319,10 @@ export default class LevelMapScene extends Phaser.Scene {
     const totalWidth = offsetX + 12;
     this.languageToggleBackground.width = Math.max(totalWidth, 160);
     this.languageToggleBackground.height = 40;
-    this.languageToggleContainer.setPosition(
-      this.scale.width - this.languageToggleBackground.width - this.languageTogglePadding,
-      this.languageToggleY
-    );
+    const toggleX =
+      this.scale.width - this.languageToggleBackground.width - this.languageTogglePadding - 80;
+    const toggleY = this.languageToggleY + 10;
+    this.languageToggleContainer.setPosition(toggleX, toggleY);
 
     this.levelNumberTexts.forEach((text, levelId) => {
       text.setText(translate('ui.levelMap.levelNumber', { levelNumber: levelId + 1 }));
