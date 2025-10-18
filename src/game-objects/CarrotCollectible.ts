@@ -8,18 +8,36 @@ export default class CarrotCollectible {
   private readonly horizontalSpeed: number;
   private collected = false;
   private lastKnownPosition: Phaser.Math.Vector2;
+  private readonly letterText?: Phaser.GameObjects.Text;
+  private readonly letterVerticalOffset: number;
 
-  constructor(scene: Phaser.Scene, start: Phaser.Math.Vector2, horizontalSpeed: number) {
+  constructor(
+    scene: Phaser.Scene,
+    start: Phaser.Math.Vector2,
+    horizontalSpeed: number,
+    letterText?: Phaser.GameObjects.Text
+  ) {
     this.scene = scene;
     this.horizontalSpeed = horizontalSpeed;
     this.lastKnownPosition = start.clone();
+    this.letterText = letterText;
 
     this.sprite = this.scene.add
       .image(start.x, start.y, 'carrot-coin')
       .setScale(0.08)
       .setDepth(5);
 
-    const floatOffset = 80;
+    const floatOffset = 100;
+    this.letterVerticalOffset = floatOffset - 70;
+    if (this.letterText) {
+      this.letterText.setOrigin(0.5, 1);
+      this.letterText.setDepth(6);
+      this.letterText.setFontSize(36);
+      this.letterText.setPosition(
+        start.x,
+        start.y - this.letterVerticalOffset
+      );
+    }
     this.liftTween = this.scene.tweens.add({
       targets: this.sprite,
       y: start.y - floatOffset,
@@ -49,6 +67,13 @@ export default class CarrotCollectible {
     const distance = (this.horizontalSpeed * delta) / 1000;
     this.sprite.x -= distance;
     this.lastKnownPosition.set(this.sprite.x, this.sprite.y);
+
+    if (this.letterText) {
+      this.letterText.setPosition(
+        this.sprite.x,
+        this.sprite.y - this.letterVerticalOffset
+      );
+    }
   }
 
   shouldCollect(catchPoint: Phaser.Math.Vector2): boolean {
@@ -84,6 +109,10 @@ export default class CarrotCollectible {
       this.scene.tweens.killTweensOf(this.sprite);
       this.sprite.destroy();
       this.sprite = undefined;
+    }
+    if (this.letterText) {
+      this.scene.tweens.killTweensOf(this.letterText);
+      this.letterText.destroy();
     }
   }
 

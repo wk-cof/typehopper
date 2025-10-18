@@ -48,6 +48,7 @@ export default class GameScene extends Phaser.Scene {
   private scoreText?: Phaser.GameObjects.Text;
   private activeCollectibles = new Set<CarrotCollectible>();
   private pendingStageCompletion = false;
+  private suppressNextKeyboardInput = false;
 
   constructor() {
     super('game-scene');
@@ -91,6 +92,7 @@ export default class GameScene extends Phaser.Scene {
         const lastCharacter = inputValue[inputValue.length - 1];
         this.handleLetterInput(lastCharacter);
         (inputEvent.target as HTMLInputElement).value = '';
+        this.suppressNextKeyboardInput = true;
       }
     });
 
@@ -131,6 +133,11 @@ export default class GameScene extends Phaser.Scene {
     this.startStage();
 
     this.input.keyboard?.on('keyup', (event: KeyboardEvent) => {
+      if (this.suppressNextKeyboardInput) {
+        this.suppressNextKeyboardInput = false;
+        return;
+      }
+
       this.handleLetterInput(event.key);
     });
   }
@@ -290,12 +297,12 @@ export default class GameScene extends Phaser.Scene {
     const gameObject = letter.getGameObject();
     const startPoint = new Phaser.Math.Vector2();
     gameObject.getCenter(startPoint);
-    letter.destroy();
 
     const collectible = new CarrotCollectible(
       this,
       startPoint,
-      this.letterSpeed
+      this.letterSpeed,
+      gameObject
     );
 
     this.activeCollectibles.add(collectible);
