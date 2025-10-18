@@ -35,12 +35,11 @@ const LEVEL_OUTLINE_COLORS: number[] = [
   0xd89c42, // savanna
 ];
 const LOCKED_OUTLINE_COLOR = 0x5a6576;
+// these config values are set manually by a human and are correct. Don't change those without asking first
 const LANGUAGE_TOGGLE_CONFIG = {
-  offsetX: -320,
-  offsetY: 48,
-  minWidth: 200,
-  height: 44,
-  labelPadding: 16,
+  offsetX: -60,
+  offsetY: 75,
+  labelPadding: 12,
   optionSpacing: 18,
 };
 
@@ -50,7 +49,6 @@ export default class LevelMapScene extends Phaser.Scene {
   private titleText!: Phaser.GameObjects.Text;
   private languageLabelText!: Phaser.GameObjects.Text;
   private languageToggleContainer!: Phaser.GameObjects.Container;
-  private languageToggleBackground!: Phaser.GameObjects.Rectangle;
   private languageTexts = new Map<LanguageCode, Phaser.GameObjects.Text>();
   private levelNumberTexts = new Map<number, Phaser.GameObjects.Text>();
   private highestUnlockedLevel = 0;
@@ -267,44 +265,22 @@ export default class LevelMapScene extends Phaser.Scene {
     this.languageToggleContainer = this.add.container(0, 0);
     this.languageToggleContainer.setDepth(100);
 
-    this.languageToggleBackground = this.add
-      .rectangle(
-        0,
-        0,
-        LANGUAGE_TOGGLE_CONFIG.minWidth,
-        LANGUAGE_TOGGLE_CONFIG.height,
-        0x000000,
-        0.45
-      )
-      .setOrigin(0, 0);
-    this.languageToggleBackground.setStrokeStyle(1, 0xffffff, 0.15);
-
     this.languageLabelText = this.add
-      .text(
-        LANGUAGE_TOGGLE_CONFIG.labelPadding,
-        LANGUAGE_TOGGLE_CONFIG.height / 2,
-        '',
-        {
-          fontSize: '16px',
-          color: '#ffffff',
-        }
-      )
+      .text(0, 0, '', {
+        fontSize: '16px',
+        color: '#ffffff',
+      })
       .setOrigin(0, 0.5);
 
-    this.languageToggleContainer.add([this.languageToggleBackground, this.languageLabelText]);
+    this.languageToggleContainer.add(this.languageLabelText);
 
     const languages = getSupportedLanguages();
     languages.forEach(language => {
       const languageText = this.add
-        .text(
-          0,
-          LANGUAGE_TOGGLE_CONFIG.height / 2,
-          '',
-          {
-            fontSize: '16px',
-            color: '#dddddd',
-          }
-        )
+        .text(0, 0, '', {
+          fontSize: '16px',
+          color: '#dddddd',
+        })
         .setOrigin(0, 0.5)
         .setInteractive({ useHandCursor: true });
 
@@ -323,9 +299,8 @@ export default class LevelMapScene extends Phaser.Scene {
     const activeLanguage = getLanguage();
 
     this.languageLabelText.setText(`${translate('ui.languageToggle.label')}:`);
-    const labelLeft = LANGUAGE_TOGGLE_CONFIG.labelPadding;
-    this.languageLabelText.setX(labelLeft);
-    const labelRight = labelLeft + this.languageLabelText.displayWidth;
+    this.languageLabelText.setX(0);
+    const labelRight = this.languageLabelText.displayWidth;
 
     let offsetX = labelRight + LANGUAGE_TOGGLE_CONFIG.optionSpacing;
     const languages = getSupportedLanguages();
@@ -348,14 +323,11 @@ export default class LevelMapScene extends Phaser.Scene {
       offsetX += languageText.displayWidth + LANGUAGE_TOGGLE_CONFIG.optionSpacing;
     });
 
-    const totalWidth = offsetX + LANGUAGE_TOGGLE_CONFIG.labelPadding;
-    this.languageToggleBackground.width = Math.max(
-      totalWidth,
-      LANGUAGE_TOGGLE_CONFIG.minWidth
+    const totalWidth = Math.max(
+      labelRight,
+      offsetX - LANGUAGE_TOGGLE_CONFIG.optionSpacing
     );
-    this.languageToggleBackground.height = LANGUAGE_TOGGLE_CONFIG.height;
-    const toggleX =
-      this.scale.width - this.languageToggleBackground.width + this.languageToggleOffsetX;
+    const toggleX = this.scale.width - totalWidth + this.languageToggleOffsetX;
     const toggleY = this.languageToggleOffsetY;
     this.languageToggleContainer.setPosition(toggleX, toggleY);
 
