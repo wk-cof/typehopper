@@ -212,7 +212,9 @@ export default class LevelMapScene extends Phaser.Scene {
 
       const hitRadius = NODE_RADIUS + 24;
       container.setSize(hitRadius * 2, hitRadius * 2);
-      container.setInteractive(new Phaser.Geom.Circle(0, 0, hitRadius), Phaser.Geom.Circle.Contains);
+      // don't change the first 2 params in the Geom.Circle constructor, they are used for the hitbox
+      // setting 0 is incorrect!
+      container.setInteractive(new Phaser.Geom.Circle(hitRadius, hitRadius, hitRadius), Phaser.Geom.Circle.Contains);
       if (container.input) {
         container.input.cursor = 'pointer';
       }

@@ -18,6 +18,10 @@ import {
 } from '../utils/progress';
 import { getLanguage, translate, translateText } from '../utils/localization';
 
+// Scoring awards 10 points per correctly typed letter and a 50 point bonus per completed stage.
+const LETTER_POINTS = 10;
+const STAGE_COMPLETION_BONUS = 50;
+
 interface GameSceneInitData {
   levelId?: number;
   highestUnlockedLevel?: number;
@@ -38,6 +42,8 @@ export default class GameScene extends Phaser.Scene {
   private transitionTimer?: Phaser.Time.TimerEvent;
   private levelLabel!: Phaser.GameObjects.Text;
   private highestUnlockedLevel = 0;
+  private score = 0;
+  private scoreText?: Phaser.GameObjects.Text;
 
   constructor() {
     super('game-scene');
@@ -51,6 +57,7 @@ export default class GameScene extends Phaser.Scene {
       data.highestUnlockedLevel ?? getHighestUnlockedLevel();
     this.stageIndex = 0;
     this.letterSpeed = this.levelDefinition.baseLetterSpeed;
+    this.score = 0;
   }
 
   preload(): void {
@@ -99,6 +106,21 @@ export default class GameScene extends Phaser.Scene {
       )
       .setOrigin(1, 0);
 
+    const scoreYOffset = 12;
+    this.scoreText = this.add
+      .text(
+        this.scale.width - padding,
+        this.levelLabel.y + this.levelLabel.displayHeight + scoreYOffset,
+        this.getScoreLabelText(),
+        {
+          fontSize: '32px',
+          color: '#ffffff',
+          stroke: '#000000',
+          strokeThickness: 4,
+        }
+      )
+      .setOrigin(1, 0);
+
     this.startStage();
 
     this.input.keyboard?.on('keyup', (event: KeyboardEvent) => {
@@ -138,6 +160,7 @@ export default class GameScene extends Phaser.Scene {
       this.letters.removeFirstLetter();
       this.progressBar.updateProgressLetter();
       this.bunny.hop();
+      this.addScore(LETTER_POINTS);
 
       if (this.letters.isEmpty()) {
         this.completeStage();
@@ -175,6 +198,7 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
 
+    this.addScore(STAGE_COMPLETION_BONUS);
     this.stageTransitioning = true;
 
     const isFinalStage =
@@ -232,6 +256,17 @@ export default class GameScene extends Phaser.Scene {
       stage: this.stageIndex + 1,
       totalStages,
     });
+  }
+
+  private addScore(points: number): void {
+    this.score += points;
+    if (this.scoreText) {
+      this.scoreText.setText(this.getScoreLabelText());
+    }
+  }
+
+  private getScoreLabelText(): string {
+    return translate('ui.game.score', { score: this.score });
   }
 
   private resizeForGameplay(): void {
