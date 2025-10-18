@@ -49,6 +49,9 @@ export default class GameScene extends Phaser.Scene {
   private activeCollectibles = new Set<CarrotCollectible>();
   private pendingStageCompletion = false;
   private suppressNextKeyboardInput = false;
+  private exitDialogOverlay?: Phaser.GameObjects.Rectangle;
+  private exitDialogContainer?: Phaser.GameObjects.Container;
+  private exitDialogActive = false;
 
   constructor() {
     super('game-scene');
@@ -130,9 +133,20 @@ export default class GameScene extends Phaser.Scene {
       )
       .setOrigin(1, 0);
 
+    this.createExitControls();
     this.startStage();
 
     this.input.keyboard?.on('keyup', (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (this.exitDialogActive) {
+          this.closeExitDialog();
+        } else {
+          this.openExitDialog();
+        }
+        this.suppressNextKeyboardInput = false;
+        return;
+      }
+
       if (this.suppressNextKeyboardInput) {
         this.suppressNextKeyboardInput = false;
         return;
@@ -161,7 +175,8 @@ export default class GameScene extends Phaser.Scene {
       !rawInput ||
       rawInput.length !== 1 ||
       !this.letters ||
-      this.stageTransitioning
+      this.stageTransitioning ||
+      this.exitDialogActive
     ) {
       return;
     }
@@ -215,6 +230,177 @@ export default class GameScene extends Phaser.Scene {
     this.bunny.resetPosition();
     this.levelLabel.setText(this.getLevelLabelText());
     this.pendingStageCompletion = false;
+  }
+
+  private createExitControls(): void {
+    const padding = 20;
+    const buttonWidth = 160;
+    const buttonHeight = 44;
+
+    const background = this.add
+      .rectangle(0, 0, buttonWidth, buttonHeight, 0x000000, 0.55)
+      .setOrigin(0.5, 0.5)
+      .setStrokeStyle(2, 0xffffff, 0.6);
+
+    const label = this.add
+      .text(0, 0, translate('ui.game.exit'), {
+        fontSize: '20px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5, 0.5);
+
+    const container = this.add
+      .container(padding + buttonWidth / 2, padding + buttonHeight / 2, [
+        background,
+        label,
+      ])
+      .setDepth(6);
+
+    container.setSize(buttonWidth, buttonHeight);
+    container.setInteractive(
+      new Phaser.Geom.Rectangle(
+        0,
+        0,
+        buttonWidth,
+        buttonHeight
+      ),
+      Phaser.Geom.Rectangle.Contains
+    );
+    if (container.input) {
+      container.input.cursor = 'pointer';
+    }
+    container.on('pointerover', () => {
+      background.setFillStyle(0x2b2b33, 0.75);
+    });
+    container.on('pointerout', () => {
+      background.setFillStyle(0x000000, 0.55);
+    });
+    container.on('pointerup', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event?: Phaser.Types.Input.EventData) => {
+      event?.stopPropagation();
+      this.openExitDialog();
+    });
+
+  }
+
+  private openExitDialog(): void {
+    if (this.exitDialogActive) {
+      return;
+    }
+
+    this.exitDialogActive = true;
+
+    this.exitDialogOverlay = this.add
+      .rectangle(0, 0, this.scale.width, this.scale.height, 0x000000, 0.5)
+      .setOrigin(0, 0)
+      .setDepth(40)
+      .setInteractive();
+
+    this.exitDialogOverlay.on('pointerup', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event?: Phaser.Types.Input.EventData) => {
+      event?.stopPropagation();
+      this.closeExitDialog();
+    });
+
+    const dialogWidth = 440;
+    const dialogHeight = 220;
+    const container = this.add
+      .container(this.scale.width / 2, this.scale.height / 2)
+      .setDepth(50);
+
+    const background = this.add
+      .rectangle(0, 0, dialogWidth, dialogHeight, 0x1b2f33, 0.95)
+      .setOrigin(0.5, 0.5)
+      .setStrokeStyle(4, 0xffffff, 0.65);
+
+    const message = this.add
+      .text(0, -40, translate('ui.dialog.confirmExit'), {
+        fontSize: '24px',
+        color: '#ffffff',
+        align: 'center',
+        wordWrap: { width: dialogWidth - 60 },
+      })
+      .setOrigin(0.5, 0.5);
+
+    const confirmButton = this.createDialogButton(
+      translate('ui.dialog.confirm'),
+      () => {
+        this.closeExitDialog();
+        this.performExitToMap();
+      }
+    );
+    confirmButton.setPosition(-90, 55);
+
+    const cancelButton = this.createDialogButton(
+      translate('ui.dialog.cancel'),
+      () => {
+        this.closeExitDialog();
+      }
+    );
+    cancelButton.setPosition(90, 55);
+
+    container.add([background, message, confirmButton, cancelButton]);
+
+    this.exitDialogContainer = container;
+  }
+
+  private closeExitDialog(): void {
+    if (!this.exitDialogActive) {
+      return;
+    }
+
+    this.exitDialogActive = false;
+    this.exitDialogOverlay?.destroy();
+    this.exitDialogContainer?.destroy();
+    this.exitDialogOverlay = undefined;
+    this.exitDialogContainer = undefined;
+  }
+
+  private performExitToMap(): void {
+    this.transitionTimer?.remove();
+    this.clearCollectibles();
+    this.letters?.destroyAll();
+    this.scene.start('level-map-scene');
+  }
+
+  private createDialogButton(
+    label: string,
+    onClick: () => void
+  ): Phaser.GameObjects.Container {
+    const width = 160;
+    const height = 56;
+    const background = this.add
+      .rectangle(0, 0, width, height, 0xffffff, 0.18)
+      .setOrigin(0.5, 0.5)
+      .setStrokeStyle(2, 0xffffff, 0.7);
+    const text = this.add
+      .text(0, 0, label, {
+        fontSize: '22px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5, 0.5);
+
+    const container = this.add.container(0, 0, [background, text]);
+    container.setSize(width, height);
+    container.setInteractive(
+      new Phaser.Geom.Rectangle(0, 0, width, height),
+      Phaser.Geom.Rectangle.Contains
+    );
+
+    container.on('pointerover', () => {
+      background.setFillStyle(0xffffff, 0.28);
+    });
+    container.on('pointerout', () => {
+      background.setFillStyle(0xffffff, 0.18);
+    });
+    container.on('pointerup', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event?: Phaser.Types.Input.EventData) => {
+      event?.stopPropagation();
+      onClick();
+    });
+
+    return container;
   }
 
   private completeStage(): void {
