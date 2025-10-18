@@ -146,6 +146,7 @@ export default class GameScene extends Phaser.Scene {
     this.background.update(delta);
     this.letters.update(time, delta, letterLockX);
     this.bunny.update();
+    this.updateCollectibles(delta);
   }
 
   private handleLetterInput(rawInput: string): void {
@@ -287,21 +288,14 @@ export default class GameScene extends Phaser.Scene {
 
   private launchCollectibleFromLetter(letter: Letter): void {
     const gameObject = letter.getGameObject();
-    const startPoint = new Phaser.Math.Vector2(
-      gameObject.x,
-      gameObject.y
-    );
+    const startPoint = new Phaser.Math.Vector2();
+    gameObject.getCenter(startPoint);
     letter.destroy();
 
-    const catchPoint = this.bunny.getCatchPoint().clone();
     const collectible = new CarrotCollectible(
       this,
       startPoint,
-      catchPoint,
-      () => {
-        this.activeCollectibles.delete(collectible);
-        this.onCollectibleArrived(catchPoint.clone());
-      }
+      this.letterSpeed
     );
 
     this.activeCollectibles.add(collectible);
@@ -335,8 +329,31 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private clearCollectibles(): void {
-    this.activeCollectibles.forEach(collectible => collectible.cancel());
+    this.activeCollectibles.forEach(collectible => collectible.destroy());
     this.activeCollectibles.clear();
+  }
+
+  private updateCollectibles(delta: number): void {
+    if (this.activeCollectibles.size === 0) {
+      return;
+    }
+
+    const catchPoint = this.bunny.getCatchPoint();
+    const toCollect: CarrotCollectible[] = [];
+
+    this.activeCollectibles.forEach(collectible => {
+      collectible.update(delta);
+      if (collectible.shouldCollect(catchPoint)) {
+        toCollect.push(collectible);
+      }
+    });
+
+    toCollect.forEach(collectible => {
+      this.activeCollectibles.delete(collectible);
+      const position = collectible.getPosition();
+      collectible.collect();
+      this.onCollectibleArrived(position);
+    });
   }
 
   private resizeForGameplay(): void {
